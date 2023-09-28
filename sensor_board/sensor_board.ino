@@ -12,7 +12,6 @@
 char ssid[] = SSID;              // imported from WiFiCredentials.h
 char pass[] = PASSWORD;          // imported from WiFiCredentials.h
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
-int reqCount = 0;                // number of requests received
 SoftwareSerial Serial1(6, 7);    // RX, TX
 
 WiFiEspClient client;
@@ -63,15 +62,22 @@ void loop()
 
     while (client.connected()) {
 
+        char data[28] = "";
+        sprintf(data, "{\"temp\":\"%.1f\",\"rh\":\"%.1f\"}", 69.68123, 42.3243);
+
         client.print("\r\nPOST /data HTTP/1.1\r\n");
         client.print("Host: ");
         client.print(url);
         client.print(":");
         client.print(port);
         client.print("\r\nContent-Type: application/json\r\n");
-        client.print("Content-Length: 34\r\n\r\n");
-        client.println("{\"temp\":\"69.69\",\"humidity\":\"42.0\"}");
-        client.println();
+        client.print("Content-Length: 29\r\n\r\n");
+        client.print("{\"temp\":\"");
+        client.print(22.2);
+        client.print("\",\"rh\":\"");
+        client.print(66.6);
+        client.print("\"}\r\n");
+        client.println("\r\n");
 
         //   client.print(32 + (1.8 * aht20.getTemperature()));
         //   client.print(aht20.getHumidity());
