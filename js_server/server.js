@@ -16,15 +16,12 @@ app.post('/data', (req, res) => {
     let paddedMinutes = today.getMinutes().toLocaleString(undefined, {minimumIntegerDigits: 2});
     let paddedSeconds = today.getSeconds().toLocaleString(undefined, {minimumIntegerDigits: 2});
     let time = today.getHours() + ":" + paddedMinutes + ":" + paddedSeconds;
-    let dateTime = date + ' ' + time;
+    let timestamp = date + ' ' + time;
 
     const data = req.body;
 
-    console.log(dateTime + ":");
-    console.log(data);
-    // console.log(data.temp);
-    // console.log(data.humidity);
-    res.status(200).send("mubtime");
+    console.log(`INSERT INTO temprh (date, time, temp, rh) VALUES (${date}, ${time}, ${data.temp}, ${data.rh})`);
+    res.status(200).send("Done");
   });
 
 // app.put('/data/:param1', (req, res) => {
