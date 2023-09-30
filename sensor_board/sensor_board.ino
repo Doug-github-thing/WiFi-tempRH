@@ -62,26 +62,35 @@ void loop()
 
     while (client.connected()) {
 
-        char data[28] = "";
-        sprintf(data, "{\"temp\":\"%.1f\",\"rh\":\"%.1f\"}", 69.68123, 42.3243);
+        float temp = 32.0 + (1.8 * aht20.getTemperature());
+        float rh =  aht20.getHumidity();
+        char str_temp[5];
+        char str_rh[5];
+        dtostrf(temp, 4, 2, str_temp);
+        dtostrf(rh, 4, 2, str_rh);
 
         client.print("\r\nPOST /data HTTP/1.1\r\n");
         client.print("Host: ");
         client.print(url);
         client.print(":");
         client.print(port);
+        client.print("\r\nUser-Agent: WiFi tempRH module/1.0");
         client.print("\r\nContent-Type: application/json\r\n");
-        client.print("Content-Length: 29\r\n\r\n");
-        client.print("{\"temp\":\"");
-        client.print(22.2);
-        client.print("\",\"rh\":\"");
-        client.print(66.6);
-        client.print("\"}\r\n");
-        client.println("\r\n");
 
-        //   client.print(32 + (1.8 * aht20.getTemperature()));
-        //   client.print(aht20.getHumidity());
+        char data[36];
+        sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}", str_temp, str_rh);
+
+        // compute length of data string
+        int data_length = 0;
+        while(data[data_length])
+            data_length++;
+
+        char len[23];
+        sprintf(len, "Content-Length: %d\r\n\r\n", data_length);
+        client.print(len);
+        client.print(data);
+
         break;
     }
-    delay(10000);
+    delay(1000);
 }
