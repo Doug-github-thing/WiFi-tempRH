@@ -63,8 +63,9 @@ void loop()
     while (client.connected()) {
 
         float temp = 32.0 + (1.8 * aht20.getTemperature());
-        float rh =  aht20.getHumidity();
-        char str_temp[5];
+        // float temp = aht20.getTemperature();
+        float rh   = aht20.getHumidity();
+        char str_temp[8];
         char str_rh[5];
         dtostrf(temp, 4, 2, str_temp);
         dtostrf(rh, 4, 2, str_rh);
@@ -90,7 +91,7 @@ void loop()
         client.print(len);
         client.print(data);
 
-        break;
+        delay(5000);
+        // break;
     }
-    delay(1000);
 }
