@@ -1,20 +1,29 @@
 const express = require('express');
 const pg = require('pg');
-
 const app = express();
-const port = 3000;
+app.use(express.json());
 
 // removed url to push to git, because I don't know how to
 // properly separate passwords from source code safely in NodeJS yet
 const conString = "MY_ELEPHANTSQL_URL";
 const client = new pg.Client(conString);
 
+const port = 3000;
+
 ///////////////////////////////////////////////////////////////////////////////////
 
-app.use(express.json());
-
+// start listening for any incoming traffic
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+  });
+
+
+// Establish connection to ElephantSQL database
+client.connect(function(err) {
+    if(err) {
+      return console.error('could not connect to postgres', err);
+    }
+    console.log("Connected to database!");
   });
 
 // listen for incoming POST requests from Board
@@ -32,18 +41,13 @@ app.post('/data', (req, res) => {
                     + `'${data.temp}',`
                     + `'${data.rh}')`;
     console.log("Attempting to run " + my_query);
-    
-    client.connect(function(err) {
+
+    // passes SQL query to ElephantSQL connection
+    client.query(my_query, function(err, result) {
       if(err) {
-        return console.error('could not connect to postgres', err);
+        return console.error('error running query', err);
       }
-      client.query(my_query, function(err, result) {
-        if(err) {
-          return console.error('error running query', err);
-        }
-        console.log("sent!");
-        client.end();
-      });
+      console.log("Query sent successfully");
     });
     
     res.status(200).send("Done");
