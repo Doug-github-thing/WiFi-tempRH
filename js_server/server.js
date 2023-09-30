@@ -1,7 +1,14 @@
 const express = require('express');
+const pg = require('pg');
 
 const app = express();
 const port = 3000;
+
+// removed url to push to git, because I don't know how to push passwords safely in NodeJS yet
+const conString = "MY_ELEPHANTSQL_URL";
+const client = new pg.Client(conString);
+
+///////////////////////////////////////////////////////////////////////////////////
 
 app.use(express.json());
 
@@ -12,19 +19,32 @@ app.listen(port, () => {
 // listen for incoming POST requests from Board
 app.post('/data', (req, res) => {
     let today = new Date();
-    let date = (today.getMonth()+1) + "/" + today.getDate() + "/" + today.getFullYear();
+    let paddedMonth   = (today.getMonth()+1).toLocaleString(undefined, {minimumIntegerDigits: 2});
+    let paddedDay     = today.getDate().toLocaleString(undefined, {minimumIntegerDigits: 2});
+    let paddedHours   = today.getHours().toLocaleString(undefined, {minimumIntegerDigits: 2});
     let paddedMinutes = today.getMinutes().toLocaleString(undefined, {minimumIntegerDigits: 2});
     let paddedSeconds = today.getSeconds().toLocaleString(undefined, {minimumIntegerDigits: 2});
-    let time = today.getHours() + ":" + paddedMinutes + ":" + paddedSeconds;
-    let timestamp = date + ' ' + time;
+    let date = today.getFullYear() + "-" + paddedMonth + "-" + paddedDay;
+    let time = paddedHours + ":" + paddedMinutes + ":" + paddedSeconds;
 
     const data = req.body;
 
-    console.log(`INSERT INTO temprh (date, time, temp, rh) VALUES (${date}, ${time}, ${data.temp}, ${data.rh})`);
+
+    let my_query = `INSERT INTO temprh (date, time, temp, rh) VALUES ('${date}', '${time}', '${data.temp}', '${data.rh}')`;
+    console.log("Attempting to run " + my_query);
+    
+    client.connect(function(err) {
+      if(err) {
+        return console.error('could not connect to postgres', err);
+      }
+      client.query(my_query, function(err, result) {
+        if(err) {
+          return console.error('error running query', err);
+        }
+        console.log("sent!");
+        client.end();
+      });
+    });
+    
     res.status(200).send("Done");
   });
-
-// app.put('/data/:param1', (req, res) => {
-//     console.log(req.params);
-//     res.status(420).send("Eggy bow");
-//   });
