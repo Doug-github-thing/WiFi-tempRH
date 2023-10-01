@@ -27,6 +27,11 @@ client.connect(function(err) {
     console.log("Connected to database!");
   });
 
+// display index.html as landing page
+app.get('/',function(req, res) {
+    res.sendFile('index.html', { root: __dirname + '/../'});
+});
+
 // listen for incoming POST requests from Board
 app.post('/data', (req, res) => {
     
