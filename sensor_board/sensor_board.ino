@@ -18,6 +18,8 @@ WiFiEspClient client;
 AHT20 aht20;
 
 char url[15] = "192.168.0.39";
+// trying to get it to send data to the app while deployed at Vercel:
+// char url[23] = "temp-rh.vercel.app";
 int port = 3000;
 
 
@@ -62,8 +64,9 @@ void loop()
 
     while (client.connected()) {
 
+        // intialize real data values to send, save as string
+        // since AVR controllers don't support sprintf for floats
         float temp = 32.0 + (1.8 * aht20.getTemperature());
-        // float temp = aht20.getTemperature();
         float rh   = aht20.getHumidity();
         char str_temp[8];
         char str_rh[5];
@@ -81,17 +84,16 @@ void loop()
         char data[36];
         sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}", str_temp, str_rh);
 
-        // compute length of data string
-        int data_length = 0;
-        while(data[data_length])
-            data_length++;
+        // compute length of the data JSON string
+        int content_len = 0;
+        while(data[content_len])
+            content_len++;
 
-        char len[23];
-        sprintf(len, "Content-Length: %d\r\n\r\n", data_length);
-        client.print(len);
+        char content_len_str[23];
+        sprintf(content_len_str, "Content-Length: %d\r\n\r\n", content_len);
+        client.print(content_len_str);
         client.print(data);
 
         delay(5000);
-        // break;
     }
 }
