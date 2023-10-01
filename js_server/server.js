@@ -29,6 +29,7 @@ client.connect(function(err) {
 
 // display index.html as landing page
 app.get('/',function(req, res) {
+    console.log("get was called");
     res.sendFile('index.html', { root: __dirname + '/web/'});
 });
 
@@ -39,6 +40,11 @@ app.post('/data', (req, res) => {
     // and current timestamp to send to the database
     dateTime = getDateTime();
     const data = req.body;
+
+    console.log(`received the following from ${req.ip}:`);
+    console.log(`protocol: ${req.protocol}`);
+    console.log(`headers: ${req.rawHeaders}`);
+    console.log(`'originalUrl': ${req.originalUrl}`);
 
     // builds SQL query
     let my_query = "INSERT INTO temprh (date, time, temp, rh) VALUES ("
