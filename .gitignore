@@ -3,3 +3,4 @@ sensor_board/build
 sensor_board/WiFiCredentials.h
 js_server/node_modules
 *.env
+curl_test.sh
