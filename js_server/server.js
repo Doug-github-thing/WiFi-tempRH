@@ -29,7 +29,7 @@ client.connect(function(err) {
 
 // display index.html as landing page
 app.get('/',function(req, res) {
-    res.sendFile('index.html', { root: __dirname + '/../'});
+    res.sendFile('index.html', { root: __dirname + '/web/'});
 });
 
 // listen for incoming POST requests from Board
