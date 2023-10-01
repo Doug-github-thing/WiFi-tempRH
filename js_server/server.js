@@ -5,7 +5,7 @@ app.use(express.json());
 
 // removed url to push to git, because I don't know how to
 // properly separate passwords from source code safely in NodeJS yet
-const conString = "MY_ELEPHANTSQL_URL";
+const conString = MY_ELEPHANTSQL_URL;
 const client = new pg.Client(conString);
 
 const port = 3000;
