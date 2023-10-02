@@ -17,9 +17,7 @@ SoftwareSerial Serial1(6, 7);    // RX, TX
 WiFiEspClient client;
 AHT20 aht20;
 
-char url[15] = "192.168.0.39";
-// trying to get it to send data to the app while deployed at Vercel:
-// char url[23] = "temp-rh.vercel.app";
+#define HOST "192.168.0.39"
 int port = 3000;
 
 
@@ -59,8 +57,14 @@ void setup()
 
 void loop()
 {
-    if (!client.connect(url, port))
+    // try to connect to the host, and blink to show if it can't
+    if (!client.connect(HOST, port)) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(100);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(200);
         return;
+    }
 
     while (client.connected()) {
 
@@ -73,14 +77,26 @@ void loop()
         dtostrf(temp, 4, 2, str_temp);
         dtostrf(rh, 4, 2, str_rh);
 
-        client.print("\r\nPOST /data HTTP/1.1\r\n");
-        client.print("Host: ");
-        client.print(url);
-        client.print(":");
-        client.print(port);
-        client.print("\r\nUser-Agent: WiFi tempRH module/1.0");
-        client.print("\r\nContent-Type: application/json\r\n");
+        // The HTTP command sent by curl to my ExpressJS app on Vercel
+        // I want to emulate this Request to send it from this ESP client:
 
+        // > POST /data HTTP/2
+        // > Host: <MY_APP_HOSTNAME>
+        // > user-agent: curl/7.81.0
+        // > accept: */*
+        // > content-type: application/json
+        // > content-length: 25
+
+        // But for now, this request hits my ExpressJS server when locally hosted
+        client.println("\r\nPOST /data HTTP/1.1");
+        char host[];
+        sprintf(host, "Host: %s:%d", HOST, port);
+        client.println(host);
+        client.println("User-Agent: Doug's TempRH Board/1.0");
+        client.println("Accept: */*");
+        client.println("Content-Type: application/json");
+
+        // format data as JSON to send
         char data[36];
         sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}", str_temp, str_rh);
 
@@ -89,10 +105,12 @@ void loop()
         while(data[content_len])
             content_len++;
 
+        // format content-length header
         char content_len_str[23];
-        sprintf(content_len_str, "Content-Length: %d\r\n\r\n", content_len);
-        client.print(content_len_str);
-        client.print(data);
+        sprintf(content_len_str, "Content-Length: %d\r\n\r\n", content_len + 2);
+
+        client.println(content_len_str);
+        client.println(data);
 
         delay(5000);
     }
