@@ -20,7 +20,7 @@ bool local = true;
 // set HOST based on value of bool descripter "local"
 // hostnames imported from WiFICredentials.h for security
 #define HOST local ? LOCAL_HOST : REMOTE_HOST
-int port = 3000;
+#define PORT local ? 3000 : 443
 
 void setup()
 {
@@ -51,7 +51,7 @@ void setup()
 void loop()
 {
     // try to connect to the host, and blink to show if it can't
-    if (!client.connect(HOST, port)) {
+    if (!client.connect(HOST, PORT)) {
         blink(LED_BUILTIN, 3);
         return;
     }
@@ -102,14 +102,14 @@ void sendPOST() {
     // > content-type: application/json
     // > content-length: 25
 
-    client.println("\r\nPOST /data HTTP/1.1");
+    client.println("POST /data HTTP/1.1");
     client.print("Host: ");
     client.println(HOST);
-    client.println("User-Agent: Doug's TempRH Board/1.0");
-    client.println("Accept: */*");
-    client.println("Connection: close");
-    client.println("Content-Type: application/json");
-    client.println("Content-Length: 29");
+    client.println("user-agent: Doug's TempRH Board/1.0");
+    client.println("accept: */*");
+    // client.println("Connection: close");
+    client.println("content-type: application/json");
+    client.println("content-length: 29");
     client.println();
     client.println(data);
 }
