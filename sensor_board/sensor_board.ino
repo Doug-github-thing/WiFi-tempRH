@@ -1,115 +1,126 @@
-// This is being written and tested on an Arduino Uno, but the
-// intention is to swap it out for an Atmega328p once the software
-// reaches a point where it feels like I am taking this project
-// seriously enough to start spending money on hardware.
+// For the sensor
+#include <Adafruit_Sensor.h>
+#include <DHT_U.h>
+#include <DHT.h>
 
-#include <AHT20.h>
-#include "WiFiEsp.h"
-#include "SoftwareSerial.h"
+// For the WiFi
+#include <ESP8266WiFi.h>
+
+// Configuration header with WiFi creds, and backend app address
 #include "WiFiCredentials.h"
 
-SoftwareSerial Serial1(6, 7);    // RX, TX
+// If this boolean variable is true, 
+// the board will connect to the local host, defined in WiFiCredentials.h.
+// If false, will attempt to connect to the cloud host, defined in WiFiCredentials.h.
+boolean local = true;
+const char* HOST = local ? LOCAL_HOST : REMOTE_HOST;
 
-WiFiEspClient client;
-AHT20 aht20;
+// Initialize the sensor
+DHT dht11(4, DHT11);
 
-// a variable so I can quickly swap between "pushing to local/remote backend" modes
-// for testing why one works and the other doesn't
-bool local = true;
+void setup() {
 
-// set HOST based on value of bool descripter "local"
-// hostnames imported from WiFICredentials.h for security
-#define HOST local ? LOCAL_HOST : REMOTE_HOST
-#define PORT local ? 3000 : 443
+  // Start the sensor
+  dht11.begin();
+  Serial.begin(115200);
 
-void setup()
-{
-    pinMode(LED_BUILTIN, OUTPUT);
+  // Connect to the WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(SSID);
 
-    // if unable to read the sensor, blink furiously
-    if (aht20.begin() == false) {
-        for(;;) {
-            blink(LED_BUILTIN, 2);
-        }
-    }
+  // Tell the ESP8266 to be a client, not an access point
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(SSID, PASSWORD);
 
-    // initialize ESP module
-    Serial1.begin(9600);
-    WiFi.init(&Serial1);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
 
-    // attempt to connect to WiFi network
-    int status = WL_IDLE_STATUS;     // default Wifi radio's status
-    while (status != WL_CONNECTED) {
-        // SSID and PASSWORD imported from WiFiCredentials.h
-        status = WiFi.begin(SSID, PASSWORD);
-    }
-  
-    // blink to show it's live
-    blink(LED_BUILTIN, 5);
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
-void loop()
-{
-    // try to connect to the host, and blink to show if it can't
-    if (!client.connect(HOST, PORT)) {
-        blink(LED_BUILTIN, 3);
-        return;
+void loop() {
+  static bool wait = false;
+
+  Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  Serial.print("connecting to ");
+  Serial.print(HOST);
+  Serial.print(':');
+  Serial.println(PORT);
+
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+  if (!client.connect(HOST, PORT)) {
+    Serial.println("connection failed");
+    delay(5000);
+    return;
+  }
+
+  // This will send a string to the server
+  Serial.println("sending data to server");
+  if (!client.connected())
+    return;
+
+  // ~~~~~~~~~~~~~~~~ START SENDING POST ~~~~~~~~~~~~~~~~~
+
+  // Reads temp/rh and formats data as JSON string
+  // char str_temp[5] = "00.0";
+  // char str_rh[5]   = "00.0";
+  float temp = 32.0 + (1.8 * dht11.readTemperature());
+  float rh   = dht11.readHumidity();
+  char str_temp[8];
+  char str_rh[5];
+  dtostrf(temp, 4, 2, str_temp);
+  dtostrf(rh, 4, 2, str_rh);
+
+  // format data as JSON to send
+  char data[36];
+  sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}\r\n", str_temp, str_rh);
+
+  // Send the headers, then the data
+  client.println("POST /data HTTP/1.1");
+  client.print("Host: ");
+  client.print(HOST);
+  client.println("user-agent: Doug's TempRH Board/1.0");
+  client.println("accept: */*");
+  // client.println("Connection: close");
+  client.println("content-type: application/json");
+  client.println("content-length: 29");
+  client.println();
+  client.println(data);
+
+  // ~~~~~~~~~~~~~~~~~ DONE SENDING POST ~~~~~~~~~~~~~~~~~
+
+  // wait for data to be available
+  unsigned long timeout = millis();
+  while (client.available() == 0) {
+    if (millis() - timeout > 5000) {
+      Serial.println(">>> Client Timeout !");
+      client.stop();
+      delay(60000);
+      return;
     }
+  }
 
-    while(client.connected()) {
-        sendPOST();
-        blink(LED_BUILTIN, 2);
-        delay(5000);
-    }
+  // Read all the lines of the reply from server and print them to Serial
+  Serial.println("receiving from remote server");
+  // not testing 'client.connected()' since we do not need to send data here
+  while (client.available()) {
+    char ch = static_cast<char>(client.read());
+    Serial.print(ch);
+  }
 
-    client.stop();
-}
+  // Close the connection
+  Serial.println();
+  Serial.println("closing connection");
+  Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  client.stop();
 
-void blink(byte pin, int times) {
-    byte hilow = 0;
-    for(int i = 0; i < 2 * times; i++) {
-        hilow = hilow == 0 ? 1 : 0; 
-        digitalWrite(pin, hilow);
-        delay(100);
-    }
-}
-
-
-// send the request over the client
-void sendPOST() {
-
-    // intialize real data values to send, save as string
-    // since AVR controllers don't support sprintf for floats
-    // float temp = 32.0 + (1.8 * aht20.getTemperature());
-    // float rh   = aht20.getHumidity();
-    // char str_temp[8];
-    // char str_rh[5];
-    // dtostrf(temp, 4, 2, str_temp);
-    // dtostrf(rh, 4, 2, str_rh);
-    char str_temp[5] = "00.0";
-    char str_rh[5] = "00.0";     
-
-    // format data as JSON to send
-    char data[36];
-    sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}\r\n", str_temp, str_rh);
-
-    // This is the HTTP request taken from `curl` output when posting via linux cli
-    // and successfully hits the database every time
-    // > POST /data HTTP/2
-    // > Host: <MY_APP_HOSTNAME>
-    // > user-agent: curl/7.81.0
-    // > accept: */*
-    // > content-type: application/json
-    // > content-length: 25
-
-    client.println("POST /data HTTP/1.1");
-    client.print("Host: ");
-    client.println(HOST);
-    client.println("user-agent: Doug's TempRH Board/1.0");
-    client.println("accept: */*");
-    // client.println("Connection: close");
-    client.println("content-type: application/json");
-    client.println("content-length: 29");
-    client.println();
-    client.println(data);
+  delay(900000);  // delay 15 seconds!
 }
