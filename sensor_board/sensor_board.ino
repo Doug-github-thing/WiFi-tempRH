@@ -9,20 +9,29 @@
 // Configuration header with WiFi creds, and backend app address
 #include "WiFiCredentials.h"
 
+// For String manipulation
+#include <string.h>
+
 // If this boolean variable is true, 
 // the board will connect to the local host, defined in WiFiCredentials.h.
 // If false, will attempt to connect to the cloud host, defined in WiFiCredentials.h.
-boolean local = true;
-const char* HOST = local ? LOCAL_HOST : REMOTE_HOST;
+boolean local = false;
+const char* host = local ? LOCAL_HOST : REMOTE_HOST;
+int port = local ? PORT : 443;
 
 // Initialize the sensor
 DHT dht11(4, DHT11);
+
+// Initialize the client
+BearSSL::WiFiClientSecure client;
 
 void setup() {
 
   // Start the sensor
   dht11.begin();
   Serial.begin(115200);
+
+  client.setInsecure();
 
   // Connect to the WiFi network
   Serial.println();
@@ -49,14 +58,10 @@ void loop() {
   static bool wait = false;
 
   Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-  Serial.print("connecting to ");
-  Serial.print(HOST);
-  Serial.print(':');
-  Serial.println(PORT);
+  Serial.print("Connecting to host: ");
+  Serial.println(host);
 
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  if (!client.connect(HOST, PORT)) {
+  if (!client.connect(host, port)) {
     Serial.println("connection failed");
     delay(5000);
     return;
@@ -70,8 +75,6 @@ void loop() {
   // ~~~~~~~~~~~~~~~~ START SENDING POST ~~~~~~~~~~~~~~~~~
 
   // Reads temp/rh and formats data as JSON string
-  // char str_temp[5] = "00.0";
-  // char str_rh[5]   = "00.0";
   float temp = 32.0 + (1.8 * dht11.readTemperature());
   float rh   = dht11.readHumidity();
   char str_temp[8];
@@ -81,19 +84,23 @@ void loop() {
 
   // format data as JSON to send
   char data[36];
-  sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}\r\n", str_temp, str_rh);
+  sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}\r", str_temp, str_rh);
 
-  // Send the headers, then the data
-  client.println("POST /data HTTP/1.1");
-  client.print("Host: ");
-  client.print(HOST);
-  client.println("user-agent: Doug's TempRH Board/1.0");
-  client.println("accept: */*");
-  // client.println("Connection: close");
-  client.println("content-type: application/json");
-  client.println("content-length: 29");
-  client.println();
-  client.println(data);
+  char request[300];
+  sprintf(request,
+    "POST /data HTTP/2\n\n"
+    "Host: %s\n"
+    "User-Agent: DogNodeMCU\n"
+    "Accept: */*\n"
+    "Content-Type: application/Json\n"
+    "Content-Length: 25\n\n"
+    "%s", host, data);
+  
+  Serial.println("Sending the following request:");
+  Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  Serial.println(request);
+  client.println(request);
+  Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
   // ~~~~~~~~~~~~~~~~~ DONE SENDING POST ~~~~~~~~~~~~~~~~~
 
