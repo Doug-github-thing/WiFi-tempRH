@@ -5,4 +5,3 @@ sensor_board/WiFiCredentials.h
 curl_test.sh
 open_terminals.sh
 */node_modules/
-frontend/build/
