@@ -19,17 +19,33 @@ app.use(cors());
 
 // start listening for any incoming traffic
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
+  console.log(`Server is running on port ${port}`);
+});
 
 
 // Establish connection to ElephantSQL database
 db.connect(function(err) {
-    if(err) {
-      return console.error('could not connect to postgres', err);
-    }
-    console.log("Connected to database!");
+  if(err) {
+    return console.error('could not connect to postgres', err);
+  }
+  console.log("Connected to database!");
+
+  // Creates the TempRH table if it does not exist
+  const my_query = "CREATE TABLE IF NOT EXISTS "
+                  + "tempRH ("
+                  + "ID SERIAL PRIMARY KEY,"
+                  + "timestamp timestamp,"
+                  + "temp decimal(5,2),"
+                  + "rh decimal(5,2)"
+                  + ");";
+
+  // Runs query to create table
+  db.query(my_query, function(err, result) {
+    if(err)
+      return console.error('error creating TempRH table', err);
   });
+
+});
 
 
   // display index.html as landing page
@@ -59,20 +75,19 @@ app.get("/current", (req, res) => {
 // listen for incoming POST traffic from Board with new data to push the the database.
 app.post('/data', (req, res) => {
     
-    // parses values from incoming data from Board, 
+    // Parses values from incoming data from Board, 
     // and current timestamp to send to the database
-    dateTime = getDateTime();
+    const timestamp = getTimestamp();
     const data = req.body;
 
-    // builds SQL query
-    const my_query = "INSERT INTO temprh (date, time, temp, rh) VALUES ("
-                    + `'${dateTime.date}',`
-                    + `'${dateTime.time}',`
+    // Builds SQL query
+    const my_query = "INSERT INTO temprh (timestamp, temp, rh) VALUES ("
+                    + `'${timestamp}',`
                     + `'${data.temp}',`
                     + `'${data.rh}');`;
-    console.log("Attempting to run " + my_query);
+    console.log("Attempting to run: " + my_query);
 
-    // passes SQL query to ElephantSQL connection
+    // Passes SQL query to ElephantSQL connection
     db.query(my_query, function(err, result) {
       if(err) {
         return console.error('error running query', err);
@@ -84,17 +99,28 @@ app.post('/data', (req, res) => {
   });
 
 
-// returns an Object containing 'date' and 'time'
-// of the form {date:"YYYY-MM-DD", time:"hh:mm:ss"}
-function getDateTime() {
-  let today = new Date();
-  let paddedMonth   = (today.getMonth()+1).toLocaleString(undefined, {minimumIntegerDigits: 2});
-  let paddedDay     = today.getDate().toLocaleString(undefined, {minimumIntegerDigits: 2});
-  let paddedHours   = today.getHours().toLocaleString(undefined, {minimumIntegerDigits: 2});
-  let paddedMinutes = today.getMinutes().toLocaleString(undefined, {minimumIntegerDigits: 2});
-  let paddedSeconds = today.getSeconds().toLocaleString(undefined, {minimumIntegerDigits: 2});
-  let date = today.getFullYear() + "-" + paddedMonth + "-" + paddedDay;
-  let time = paddedHours + ":" + paddedMinutes + ":" + paddedSeconds;
+// // returns an Object containing 'date' and 'time'
+// // of the form {date:"YYYY-MM-DD", time:"hh:mm:ss"}
+// function getDateTime() {
+//   let today = new Date();
+//   let paddedMonth   = (today.getMonth()+1).toLocaleString(undefined, {minimumIntegerDigits: 2});
+//   let paddedDay     = today.getDate().toLocaleString(undefined, {minimumIntegerDigits: 2});
+//   let paddedHours   = today.getHours().toLocaleString(undefined, {minimumIntegerDigits: 2});
+//   let paddedMinutes = today.getMinutes().toLocaleString(undefined, {minimumIntegerDigits: 2});
+//   let paddedSeconds = today.getSeconds().toLocaleString(undefined, {minimumIntegerDigits: 2});
+//   let date = today.getFullYear() + "-" + paddedMonth + "-" + paddedDay;
+//   let time = paddedHours + ":" + paddedMinutes + ":" + paddedSeconds;
   
-  return {date:date, time:time};
+//   return {date:date, time:time};
+// }
+
+
+// Gets the current timestamp in the proper format to use as a SQL timestamp
+function getTimestamp() {
+  const now = new Date();
+  // Format the date as a string in the 'YYYY-MM-DD HH:mm:ss' format
+  //  1.  now.toISOString() generates a string representation of the date in the ISO format: 'YYYY-MM-DDTHH:mm:ss.sssZ'.
+  //  2.  .replace('T', ' ') replaces the 'T' character with a space.
+  //  3.  .replace(/\.\d{3}Z$/, '') removes the milliseconds and the 'Z' character at the end.
+  return now.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');  
 }
