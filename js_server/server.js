@@ -4,12 +4,10 @@ const pg = require('pg');
 const app = express();
 app.use(express.json());
 
-// removed url to push to git, because I don't know how to
-// properly separate passwords from source code safely in NodeJS yet
 const conString = process.env.MY_ELEPHANTSQL_URL;
-const client = new pg.Client(conString);
+const db = new pg.Client(conString);
 
-const port = 3000;
+const port = 3333;
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -20,20 +18,39 @@ app.listen(port, () => {
 
 
 // Establish connection to ElephantSQL database
-client.connect(function(err) {
+db.connect(function(err) {
     if(err) {
       return console.error('could not connect to postgres', err);
     }
     console.log("Connected to database!");
   });
 
-// display index.html as landing page
+
+  // display index.html as landing page
 app.get('/',function(req, res) {
     console.log("get was called");
     res.sendFile('index.html', { root: __dirname + '/web/'});
 });
 
-// listen for incoming POST requests from Board
+
+// Get the most recent datapoint and return it to the frontend
+app.get("/current", (req, res) => {
+
+  // Builds SQL query
+  const my_query = "SELECT * FROM TempRH ORDER BY date || ' ' || time DESC LIMIT 1;";
+
+  db.query(my_query, function(err, result) {
+    if(err) {
+      res.status(418).send("Error querying for newest data");
+      return console.error('error running query', err);
+    }
+    res.status(200).send(result.rows[0]);
+  });
+
+});
+
+
+// listen for incoming POST traffic from Board with new data to push the the database.
 app.post('/data', (req, res) => {
     
     // parses values from incoming data from Board, 
@@ -41,21 +58,16 @@ app.post('/data', (req, res) => {
     dateTime = getDateTime();
     const data = req.body;
 
-    console.log(`received the following from ${req.ip}:`);
-    console.log(`protocol: ${req.protocol}`);
-    console.log(`headers: ${req.rawHeaders}`);
-    console.log(`'originalUrl': ${req.originalUrl}`);
-
     // builds SQL query
-    let my_query = "INSERT INTO temprh (date, time, temp, rh) VALUES ("
+    const my_query = "INSERT INTO temprh (date, time, temp, rh) VALUES ("
                     + `'${dateTime.date}',`
                     + `'${dateTime.time}',`
                     + `'${data.temp}',`
-                    + `'${data.rh}')`;
+                    + `'${data.rh}');`;
     console.log("Attempting to run " + my_query);
 
     // passes SQL query to ElephantSQL connection
-    client.query(my_query, function(err, result) {
+    db.query(my_query, function(err, result) {
       if(err) {
         return console.error('error running query', err);
       }
