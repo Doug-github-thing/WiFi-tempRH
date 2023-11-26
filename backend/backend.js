@@ -22,22 +22,20 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-// Connect to the database
+
+// Connect to the database.
 databaseConnect();
 
-// Continuously tries to connect to the database until successful
+
+// Crashes the whole app if unable to connect to the database.
+// App would be restarted by pm2 to ensure uptime.
 function databaseConnect() {
   reconnect(function(success) {
-    
-    if(!success) {
-      console.log("Retrying in 5 seconds...");
-      setTimeout(databaseConnect, 5000);
-      return;
-    }
-
-    console.log("Database connection successful!");
+    if(!success)
+      process.exit(1);
   });
 }
+
 
 // Establish connection to ElephantSQL database.
 // Returns true if successful. False if not.
