@@ -22,37 +22,63 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
+// Connect to the database
+databaseConnect();
 
-// Establish connection to ElephantSQL database
-db.connect(function(err) {
-  if(err) {
-    return console.error('could not connect to postgres', err);
-  }
-  console.log("Connected to database!");
+// Continuously tries to connect to the database until successful
+function databaseConnect() {
+  reconnect(function(success) {
+    
+    if(!success) {
+      console.log("Retrying in 5 seconds...");
+      setTimeout(databaseConnect, 5000);
+      return;
+    }
 
-  // Creates the TempRH table if it does not exist
-  const my_query = "CREATE TABLE IF NOT EXISTS "
-                  + "TempRH ("
-                  + "ID SERIAL PRIMARY KEY,"
-                  + "timestamp timestamp,"
-                  + "temp decimal(5,2),"
-                  + "rh decimal(5,2)"
-                  + ");";
-
-  // Runs query to create table
-  db.query(my_query, function(err, result) {
-    if(err)
-      return console.error('error creating TempRH table', err);
+    console.log("Database connection successful!");
   });
+}
 
-});
+// Establish connection to ElephantSQL database.
+// Returns true if successful. False if not.
+function reconnect(callback) {
+  let success = true;
 
+  console.log("Attempting to connect to the database.");
 
-// display index.html as landing page
-app.get('/',function(req, res) {
-    console.log("get was called");
-    res.sendFile('index.html', { root: __dirname + '/web/'});
-});
+  db.connect(function(err) {
+    if(err) {
+      success = false;
+      console.error('could not connect to postgres', err);
+      callback(success);
+      return;
+    }
+
+    // Creates the TempRH table if it does not exist
+    const my_query = "CREATE TABLE IF NOT EXISTS "
+                    + "TempRH ("
+                    + "ID SERIAL PRIMARY KEY,"
+                    + "timestamp timestamp,"
+                    + "temp decimal(5,2),"
+                    + "rh decimal(5,2)"
+                    + ");";
+
+    // Runs query to create table
+    db.query(my_query, function(err, result) {
+      if(err) {
+        success = false;
+        console.error('error creating TempRH table', err);
+      }
+      callback(success);
+    });
+  });
+}
+
+// // display index.html as landing page
+// app.get('/',function(req, res) {
+//     console.log("get was called");
+//     res.sendFile('index.html', { root: __dirname + '/web/'});
+// });
 
 
 // Get the most recent datapoint and return it to the frontend
@@ -107,10 +133,8 @@ app.post('/data', (req, res) => {
       if(err) {
         return console.error('error running query', err);
       }
-      console.log("Query sent successfully");
+      console.log(`Result from running the query: ${result}`);
     });
-    
-    res.status(200).send("Done");
   });
 
 
