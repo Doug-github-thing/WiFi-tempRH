@@ -32,7 +32,7 @@ db.connect(function(err) {
 
   // Creates the TempRH table if it does not exist
   const my_query = "CREATE TABLE IF NOT EXISTS "
-                  + "tempRH ("
+                  + "TempRH ("
                   + "ID SERIAL PRIMARY KEY,"
                   + "timestamp timestamp,"
                   + "temp decimal(5,2),"
@@ -48,7 +48,7 @@ db.connect(function(err) {
 });
 
 
-  // display index.html as landing page
+// display index.html as landing page
 app.get('/',function(req, res) {
     console.log("get was called");
     res.sendFile('index.html', { root: __dirname + '/web/'});
@@ -56,10 +56,10 @@ app.get('/',function(req, res) {
 
 
 // Get the most recent datapoint and return it to the frontend
-app.get("/current", (req, res) => {
+app.get('/current', (req, res) => {
 
-  // Builds SQL query
-  const my_query = "SELECT * FROM TempRH ORDER BY date || ' ' || time DESC LIMIT 1;";
+  // Build SQL query
+  const my_query = "SELECT * FROM TempRH ORDER BY id DESC LIMIT 1;";
 
   db.query(my_query, function(err, result) {
     if(err) {
@@ -67,6 +67,21 @@ app.get("/current", (req, res) => {
       return console.error('error running query', err);
     }
     res.status(200).send(result.rows[0]);
+  });
+
+});
+
+app.get('/hour', function(req, res) {
+
+  // Build SQL query
+  const my_query = "SELECT * FROM TempRH WHERE timestamp >= NOW() - INTERVAL '1 hour';";
+
+  db.query(my_query, function(err, result) {
+    if(err) {
+      res.status(418).send("Error querying for recent data");
+      return console.error('error running query', err);
+    }
+    res.status(200).send(result.rows);
   });
 
 });
@@ -81,7 +96,7 @@ app.post('/data', (req, res) => {
     const data = req.body;
 
     // Builds SQL query
-    const my_query = "INSERT INTO temprh (timestamp, temp, rh) VALUES ("
+    const my_query = "INSERT INTO TempRH (timestamp, temp, rh) VALUES ("
                     + `'${timestamp}',`
                     + `'${data.temp}',`
                     + `'${data.rh}');`;
