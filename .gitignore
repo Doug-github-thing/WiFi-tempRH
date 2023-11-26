@@ -1,8 +1,6 @@
 sensor_board/build
 .vscode/
 sensor_board/WiFiCredentials.h
-js_server/node_modules
 *.env
 curl_test.sh
 open_terminals.sh
-*/node_modules
