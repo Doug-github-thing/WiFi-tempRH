@@ -9,6 +9,13 @@ class API {
             .then(response => response.json())
             .catch(error => console.error(error));
     }
+
+    // Perform a GET request to the backend for the data from the last hour
+    static async getHour() {
+        return await fetch(`${this.backend_url}/hour`)
+            .then(response => response.json())
+            .catch(error => console.error(error));
+    }
 }
 
 export default API;
