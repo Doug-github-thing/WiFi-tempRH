@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import snowflake from './snowflaketime.svg'; // Snowflake icon
 import API from './api/API.js'; // Backend request routes
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Legend } from 'recharts'; // Historical data visualization
+import { LineChart, Line, XAxis, YAxis, Legend } from 'recharts'; // Historical data visualization
 
 function App() {
 
@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     // Gets data from a backend request, then sets 'data' to the result
     API.getCurrent().then(json => setCurrent(json));
-    API.getHour().then(json => setData(json));
+    API.getData().then(json => setData(json));
   }, []);
 
   // Returns an array of the form [lower, upper] (ie [32, 80] for graph range)
@@ -44,25 +44,26 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={snowflake} className="App-logo" alt="SMOW" />
         
         {/* If no current data, display "Loading". If there is current data, display it! */}
-        {!current ? "Loading..." :
+        {!current ? "Connecting..." :
           <div className="dataWrapper">
             <p>Temp: {current.temp}&deg;F</p>
             <p>RH: {current.rh}%</p>
           </div>
         }
 
-        {!data ? "Loading" :
+        <img src={snowflake} className="App-logo" alt="SMOW" />
+
+        {!data ? "" :
           <>
-            <div style={{color: "#BADBED"}}>Past hour data:</div>
+            <div style={{color: "#BADBED"}}>Past 24 hours:</div>
             <LineChart width={800} height={400} data={data}>
               <Line yAxisId="left" dataKey="temp" stroke="#61dafb" dot={false} />
               <YAxis yAxisId="left" stroke="#61dafb" domain={getYAxisRange("temp")} /> 
               <Line yAxisId="right" stroke="#BADBED" type="monotone" dataKey="rh" dot={false} />
               <YAxis yAxisId="right" stroke="#BADBED" domain={getYAxisRange("rh")} orientation={"right"} /> 
-              <XAxis dataKey="timestamp" stroke="#BADBED" />
+              <XAxis dataKey="timestamp" ticks={24} stroke="#BADBED" />
               <Legend />
             </LineChart>
           </>

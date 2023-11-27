@@ -95,6 +95,8 @@ app.get('/current', (req, res) => {
 
 });
 
+
+// Gets the last hour's worth of data
 app.get('/hour', function(req, res) {
 
   // Build SQL query
@@ -107,7 +109,22 @@ app.get('/hour', function(req, res) {
     }
     res.status(200).send(result.rows);
   });
+});
 
+
+// Gets the last 24 hour's worth of data
+app.get('/day', function(req, res) {
+
+  // Build SQL query
+  const my_query = "SELECT * FROM TempRH WHERE timestamp >= NOW() - INTERVAL '1 day';";
+
+  db.query(my_query, function(err, result) {
+    if(err) {
+      res.status(418).send("Error querying for recent data");
+      return console.error('error running query', err);
+    }
+    res.status(200).send(result.rows);
+  });
 });
 
 
