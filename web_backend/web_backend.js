@@ -62,7 +62,7 @@ function databaseConnect() {
 app.get('/current', (req, res) => {
 
   // Build SQL query
-  const my_query = "SELECT * FROM TempRH ORDER BY id DESC LIMIT 1;";
+  const my_query = "SELECT * FROM TempRH_Porch ORDER BY id DESC LIMIT 1;";
 
   db.query(my_query, function(err, result) {
     if(err) {
