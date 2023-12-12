@@ -17,9 +17,16 @@ app.use(cors());
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+
 // start listening for any incoming traffic
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+
+// Display index.html as landing page to show the app is running.
+app.get('/',function(req, res) {
+  res.sendFile('index.html', { root: __dirname });
 });
 
 
