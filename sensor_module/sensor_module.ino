@@ -7,7 +7,7 @@
 #include <string.h>      // For String manipulation
 
 // Configuration header with WiFi creds, and backend app address
-#include "WiFiCredentials.h"
+#include "config.h"
 
 // Initialize the sensor
 DHT dht11(4, DHT11);
