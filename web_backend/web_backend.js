@@ -87,7 +87,7 @@ app.get('/current', (req, res) => {
 app.get('/hour', function(req, res) {
 
   // Build SQL query
-  const my_query = "SELECT * FROM TempRH WHERE timestamp >= NOW() - INTERVAL '1 hour';";
+  const my_query = "SELECT * FROM TempRH_Porch WHERE timestamp >= NOW() - INTERVAL '1 hour';";
 
   db.query(my_query, function(err, result) {
     if(err) {
@@ -111,7 +111,7 @@ app.get('/hour', function(req, res) {
 app.get('/day', function(req, res) {
 
   // Build SQL query
-  const my_query = "SELECT * FROM TempRH WHERE timestamp >= NOW() - INTERVAL '1 day';";
+  const my_query = "SELECT * FROM TempRH_Porch WHERE timestamp >= NOW() - INTERVAL '1 day';";
 
   db.query(my_query, function(err, result) {
     if(err) {
@@ -137,7 +137,7 @@ app.get('/day', function(req, res) {
 app.get('/interval', function(req, res) {
 
   // Build SQL query
-  const my_query = "SELECT * FROM TempRH WHERE timestamp >= NOW() - INTERVAL '1 day';";
+  const my_query = "SELECT * FROM TempRH_Porch WHERE timestamp >= NOW() - INTERVAL '1 day';";
 
   db.query(my_query, function(err, result) {
     if(err) {
