@@ -3,35 +3,20 @@
 #include <DHT_U.h>
 #include <DHT.h>
 
-// For the WiFi
-#include <ESP8266WiFi.h>
+#include <ESP8266WiFi.h> // For the WiFi
+#include <string.h>      // For String manipulation
 
 // Configuration header with WiFi creds, and backend app address
 #include "WiFiCredentials.h"
 
-// For String manipulation
-#include <string.h>
-
-// If this boolean variable is true, 
-// the board will connect to the local host, defined in WiFiCredentials.h.
-// If false, will attempt to connect to the cloud host, defined in WiFiCredentials.h.
-boolean local = false;
-const char* host = local ? LOCAL_HOST : REMOTE_HOST;
-int port = local ? PORT : 443;
-
 // Initialize the sensor
 DHT dht11(4, DHT11);
-
-// Initialize the client
-BearSSL::WiFiClientSecure client;
 
 void setup() {
 
   // Start the sensor
   dht11.begin();
   Serial.begin(115200);
-
-  client.setInsecure();
 
   // Connect to the WiFi network
   Serial.println();
@@ -59,16 +44,17 @@ void loop() {
 
   Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   Serial.print("Connecting to host: ");
-  Serial.println(host);
+  Serial.println(LOCAL_HOST);
 
-  if (!client.connect(host, port)) {
+  WiFiClient client;
+  if (!client.connect(LOCAL_HOST, PORT)) {
     Serial.println("connection failed");
     delay(5000);
     return;
   }
 
   // This will send a string to the server
-  Serial.println("sending data to server");
+  Serial.println("Connected.\nSending data to server:");
   if (!client.connected())
     return;
 
@@ -83,18 +69,19 @@ void loop() {
   dtostrf(rh, 4, 2, str_rh);
 
   // format data as JSON to send
-  char data[36];
-  sprintf(data, "{\"temp\":\"%s\",\"rh\":\"%s\"}\r", str_temp, str_rh);
+  int length = 43 + strlen(MODULE_ID);
+  char data[length];
+  sprintf(data, "{\"id\":\"%s\",\"temp\":\"%s\",\"rh\":\"%s\"}\r", MODULE_ID, str_temp, str_rh);
 
   char request[300];
   sprintf(request,
-    "POST /data HTTP/2\n\n"
-    "Host: %s\n"
-    "User-Agent: DogNodeMCU\n"
-    "Accept: */*\n"
-    "Content-Type: application/Json\n"
-    "Content-Length: 25\n\n"
-    "%s", host, data);
+    "POST /data HTTP/1.1\r\n"
+    "Host: %s\r\n"
+    "User-Agent: DogNodeMCU\r\n"
+    "Accept: */*\r\n"
+    "Content-Type: application/JSON\r\n"
+    "Content-Length: %d\r\n\r\n"
+    "%s", LOCAL_HOST, strlen(data), data);
   
   Serial.println("Sending the following request:");
   Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -116,8 +103,7 @@ void loop() {
   }
 
   // Read all the lines of the reply from server and print them to Serial
-  Serial.println("receiving from remote server");
-  // not testing 'client.connected()' since we do not need to send data here
+  Serial.println("Receiving from server");
   while (client.available()) {
     char ch = static_cast<char>(client.read());
     Serial.print(ch);
