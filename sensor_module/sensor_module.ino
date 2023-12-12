@@ -12,6 +12,9 @@
 // Initialize the sensor
 DHT dht11(4, DHT11);
 
+// Initialize the client in order to send data
+WiFiClient client;
+
 void setup() {
 
   // Start the sensor
@@ -46,7 +49,6 @@ void loop() {
   Serial.print("Connecting to host: ");
   Serial.println(LOCAL_HOST);
 
-  WiFiClient client;
   if (!client.connect(LOCAL_HOST, PORT)) {
     Serial.println("connection failed");
     delay(5000);
@@ -65,8 +67,8 @@ void loop() {
   float rh   = dht11.readHumidity();
   char str_temp[8];
   char str_rh[5];
-  dtostrf(temp, 4, 2, str_temp);
-  dtostrf(rh, 4, 2, str_rh);
+  dtostrf(temp, 4, 1, str_temp);
+  dtostrf(rh, 4, 1, str_rh);
 
   // format data as JSON to send
   int length = 43 + strlen(MODULE_ID);
@@ -115,5 +117,5 @@ void loop() {
   Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   client.stop();
 
-  delay(900000);  // delay 15 seconds!
+  delay(60000 * POLLING_INTERVAL);
 }
