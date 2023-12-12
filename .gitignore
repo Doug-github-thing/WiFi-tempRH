@@ -9,3 +9,4 @@ sensor_module/config.h
 # Generated files, unecessary bloat
 */node_modules/
 sensor_module/build
+frontend/build

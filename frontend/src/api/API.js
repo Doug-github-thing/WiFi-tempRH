@@ -1,7 +1,8 @@
 // For handling the web requests for fetching data from the database
 class API {
 
-    static backend_url = "http://192.168.0.47:3333";
+    // static backend_url = "http://192.168.0.47:3333";
+    static backend_url = "https:///wifi-temprh-web-backend.vercel.app";
 
     // Perform a GET request to the backend for the current (most up-to-date temp/humidity)
     static async getCurrent() {
