@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import snowflake from './snowflaketime.svg'; // Snowflake icon
 import API from './api/API.js'; // Backend request routes
-import { LineChart, Line, XAxis, YAxis, Legend } from 'recharts'; // Historical data visualization
+import { LineChart, ResponsiveContainer, Line, XAxis, YAxis, Legend, Tooltip } from 'recharts'; // Historical data visualization
 
 function App() {
 
@@ -58,14 +58,17 @@ function App() {
         {!data ? "" :
           <>
             <div style={{color: "#BADBED"}}>Past 24 hours:</div>
-            <LineChart width={800} height={400} data={data}>
-              <Line yAxisId="left" dataKey="temp" stroke="#61dafb" dot={false} />
-              <YAxis yAxisId="left" stroke="#61dafb" domain={getYAxisRange("temp")} /> 
-              <Line yAxisId="right" stroke="#BADBED" type="monotone" dataKey="rh" dot={false} />
-              <YAxis yAxisId="right" stroke="#BADBED" domain={getYAxisRange("rh")} orientation={"right"} /> 
-              <XAxis dataKey="timestamp" ticks={24} stroke="#BADBED" />
-              <Legend />
-            </LineChart>
+            <ResponsiveContainer width="100%" aspect={3}>
+              <LineChart data={data}>
+                <Line yAxisId="left" dataKey="temp" stroke="#61dafb" dot={false} />
+                <YAxis yAxisId="left" stroke="#61dafb" domain={getYAxisRange("temp")} /> 
+                <Line yAxisId="right" stroke="#BADBED" type="monotone" dataKey="rh" dot={false} />
+                <YAxis yAxisId="right" stroke="#BADBED" domain={getYAxisRange("rh")} orientation={"right"} /> 
+                <XAxis dataKey="timestamp"  stroke="#BADBED" />
+                <Tooltip />
+                <Legend />
+              </LineChart>
+            </ResponsiveContainer>
           </>
         }
 
