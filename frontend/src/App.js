@@ -4,10 +4,14 @@ import snowflake from './snowflaketime.svg'; // Snowflake icon
 import API from './api/API.js'; // Backend request routes
 import { LineChart, ResponsiveContainer, Line, XAxis, YAxis, Legend, Tooltip } from 'recharts'; // Historical data visualization
 
+// For displaying the mouse-over interactivity label on the historical data plot
+import { CustomTooltip } from './components/CustomTooltip.js';
+
 function App() {
 
-  const [current, setCurrent] = useState(null);
-  const [data, setData] = useState(null);
+  const [current, setCurrent] = useState(null); // tracks most recent data
+  const [data, setData] = useState(null);       // tracks all data for selected sensor in specified range
+
 
   // Reset displayed data on screen on load
   useEffect(() => {
@@ -15,6 +19,7 @@ function App() {
     API.getCurrent().then(json => setCurrent(json));
     API.getData().then(json => setData(json));
   }, []);
+
 
   // Returns an array of the form [lower, upper] (ie [32, 80] for graph range)
   // for the specified key, either "temp" or "rh"
@@ -41,6 +46,7 @@ function App() {
     return [Math.floor(min) - 3, Math.ceil(max) + 3];
   }
 
+
   return (
     <div className="App">
       <header className="App-header">
@@ -58,15 +64,16 @@ function App() {
         {!data ? "" :
           <>
             <div style={{color: "#BADBED"}}>Past 24 hours:</div>
-            <ResponsiveContainer width="100%" aspect={3}>
-              <LineChart data={data}>
+            <ResponsiveContainer width="100%" aspect={2}>
+              <LineChart data={data}
+                margin={{ top: 10, right: 10, left: 10, bottom: 50 }}>      
                 <Line yAxisId="left" dataKey="temp" stroke="#61dafb" dot={false} />
                 <YAxis yAxisId="left" stroke="#61dafb" domain={getYAxisRange("temp")} /> 
                 <Line yAxisId="right" stroke="#BADBED" type="monotone" dataKey="rh" dot={false} />
                 <YAxis yAxisId="right" stroke="#BADBED" domain={getYAxisRange("rh")} orientation={"right"} /> 
-                <XAxis dataKey="timestamp"  stroke="#BADBED" />
-                <Tooltip />
-                <Legend />
+                <XAxis dataKey="timestamp" stroke="#BADBED" angle={-30} textAnchor="end" />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
+                <Legend layout="horizontal" verticalAlign="top" align="center"  />
               </LineChart>
             </ResponsiveContainer>
           </>
