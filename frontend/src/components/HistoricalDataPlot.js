@@ -3,16 +3,23 @@ import { LineChart, ResponsiveContainer, Line, XAxis, YAxis, Legend, Tooltip } f
 // For displaying the mouseover tooltip
 import { CustomTooltip } from './CustomTooltip.js';
 // For list view toggle button click function
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import API from '../api/API.js';
 
 /** 
  * Renders the provided data as a plot.
  * Accepts a raw data array as props. Displays the data in a graph.
  * Has a button to switch between graph and list view for raw data.
  */
-export const HistoricalDataPlot = ({ title, data }) => {
+export const HistoricalDataPlot = ({ title }) => {
 
+    const [data, setData] = useState(); // tracks historical data to render in graph
     const [inListView, setInListView] = useState(false); // tracks if graph is in list view
+
+    // Loads data on mount
+    useEffect(() => {
+      API.getData().then(json => setData(json));
+    }, []);
 
     // Toggles the ListView state.
     // Called on button click.
