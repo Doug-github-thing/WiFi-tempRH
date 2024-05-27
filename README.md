@@ -24,28 +24,34 @@ Data retrieval:
 
 - `PostgreSQL server stores data -> Pulled from web_backend -> Pulled from web_frontend -> Displayed on screen`
 
-## Status as of 9/27/23
+
+## Updates
+## 9/27/23
 Hardware Kicad design of the sensor board is completed, but money will not be spent getting the PCBs manufactured until the prototype has a working web frontend.
 
 Arduino sends dummy placeholder data to locally hosted NodeJS server, which prints the data to the console, along with current timestamps.
 
-## Status as of 12/12/23
+## 12/12/23
 I've revised the original Atmega826 microcontroller + attached breakout WiFi board with [a single prebuilt temp/rh and built-in wifi microcontroller board](https://www.amazon.com/dp/B0CCR7B5G5?psc=1&ref=ppx_yo2ov_dt_b_product_details).
 
-I enjoyed the mess of designing my own PCB in KiCad which linked an AVR controller, ISP for programming it, power regulator circuit, display LEDs for debugging, header pins for the WiFI breakout board, and future expansion slots. But a single board manufactured in this way would be over 4 times more expensive than this board off of Amazon, due purely to economies of scale.
+I enjoyed designing my own PCB in KiCad which linked an AVR controller, ISP for programming it, power regulator circuit, display LEDs for debugging, header pins for the WiFI breakout board, and future expansion slots. But a single board manufactured in this way would be over more expensive than this board off of Amazon, due to economies of scale.
+
+## 5/27/24
+- ElephantSQL has announced EOL for cloud hosting. 
+- New circuit board based on an ESP8266 is ordered. This includes an AHT20 temp/humidity montior, and will serve as the data acquisition hardware for the project going forward.
 
 ## TO-DO
 
-Backend: 
+Backend:
 
-- It is currently hard coded to offer up data from the sensor ID "Porch". This needs to be updated to return values corresponding to any given sensor ID.
+- Transfer to new database host following ElephantSQL EOL.
+
+- It is currently hard coded to offer up data from the sensor ID "Porch". This needs to be updated to return values corresponding to any given sensor ID. <---- Check if this is still true. It may not be.
 
 - needs a route to get a list of all currently valid sensor IDs.
 
 Frontend:
 
-- needs to convert the SQL timestamp objects into a readable x axis on the data graph.
-
 - needs the function to select a time interval of data to display on the graph.
 
-- needs the function to select which sensor ID to view, from a list of all valid sensor IDs.
+- needs the function to select which sensor ID to view from a list of all valid sensor IDs.
