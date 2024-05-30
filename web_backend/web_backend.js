@@ -14,35 +14,16 @@ app.use(cors());
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-// Generic connect to the database and read all in dummy table
-const databaseConnect = async () => {
-	const connection = mysql.createConnection({
-        user: process.env.DB_USER,
-        password: process.env.DB_PWD,
-        host: process.env.DB_ENDPOINT,
-	    database: 'temprhdb'
-  	});
-
-	const my_query = "SELECT * FROM bwa;";
-
-	connection.connect(function(err) {
-		if (err) throw err;
-		console.log("Connemct");
-	});
-
-	connection.query(my_query, function (err, result) {
-    	if (err) throw err;	
-		console.log(JSON.stringify(result));
-  });
-}
-
-
+// Initializes webserver app, and tells stdout
 app.listen(port, () => {
-	  console.log(`Server is listening on port ${port}`);
+      console.log(`Server is listening on port ${port}`);
 });
 
 
+/** 
+ * Dumps all data from the database.
+ * GET '/all'
+ */
 app.get('/all', async (req, res) => {
 
     const connection = mysql.createConnection({
@@ -69,22 +50,6 @@ app.get('/all', async (req, res) => {
 }); 
 
 
-/**
- * Crashes the whole app if unable to connect to the database.
-*/
-// function databaseConnect() {
-  //   console.log("Attempting to connect to the database");
-  
-  //   db.connect(function(err) {
-    //     if(err) {
-      //       console.error(`Could not connect to postgres: ${err}`);
-      //       console.log("Aborting execution due to postgres connection failure");
-      //       process.exit(1);
-      //     }
-//   });
-// }
-
-
 // Display index.html as landing page to show the app is running.
 app.get('/',function(req, res) {
     res.sendFile('index.html', { root: __dirname });
@@ -99,7 +64,7 @@ app.get('/',function(req, res) {
  * {
  *  "id": <sensor_module_id> // Unique identifier for the sensor module
  * }
-*/
+ */
 app.get('/current', (req, res) => {
     // Build SQL query
     const my_query = "SELECT EXTRACT(epoch FROM timestamp) AS unix_timestamp, id, temp, rh " 
