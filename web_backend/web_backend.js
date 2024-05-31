@@ -1,10 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 const app = express();
 app.use(express.json());
+// import mysql from 'mysql2/promise';
 
-const conString = process.env.MY_SQL_URL;
 const port = 3333;
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,32 @@ const cors = require('cors');
 app.use(cors());
 
 ///////////////////////////////////////////////////////////////////////////////////
+
+
+// Connect to database
+const getConnection = async () => {
+    return await mysql.createConnection({
+        user: process.env.DB_USER,
+        password: process.env.DB_PWD,
+        host: process.env.DB_ENDPOINT,
+        database: 'temprhdb'
+    });
+}
+// Executes a defined query on a given connection, and sends response.
+const executeQuery = async (connection, query, req, res) => {
+    try {
+        const [results, fields] = await connection.query(query);
+        console.log(results); // results contains rows returned by server
+        console.log(fields);  // fields contains extra meta data about results, if available
+        res.status(200).send(results);
+    }
+    catch (err) {
+        res.status(500).send(err.stack);
+        throw err;
+    }
+}
+
+
 
 // Initializes webserver app, and tells stdout
 app.listen(port, () => {
@@ -25,29 +51,55 @@ app.listen(port, () => {
  * GET '/all'
  */
 app.get('/all', async (req, res) => {
-
-    const connection = mysql.createConnection({
-        user: process.env.DB_USER,
-        password: process.env.DB_PWD,
-        host: process.env.DB_ENDPOINT,
-        database: 'temprhdb'
-    });
  
+    const connection = await getConnection();
+
     const my_query = "SELECT * FROM bwa;";
  
-    connection.connect(function(err) {
-        if (err) throw err;
-        console.log("Connemct");
-    });
- 
-    connection.query(my_query, function (err, result) {
-        if (err) throw err;
-        const str_result = JSON.stringify(result);
-        console.log("Requested all. Result:");
-        console.log(str_result);
-        res.status(200).send(result);
-    });
-}); 
+    executeQuery(connection, my_query, req, res);
+});
+
+
+/** 
+ * Creates a new node representation in the database.
+ *  TODO: Make it look through the number of nodes that exists and picks the next number.
+ *  For now it just recreates Node0
+ * POST '/new/node'
+ */
+app.post('/new/node', async (req, res) => {
+
+    const id = 0; // A placeholder for the number of the node to add
+
+    const connection = await getConnection();
+
+    // Build query
+    const create_data_table = "CREATE TABLE IF NOT EXISTS "
+        + `node_${id} (`
+        + "ID SERIAL PRIMARY KEY,"
+        + "sensor INT,"
+        + "timestamp TIMESTAMP,"
+        + "temp DECIMAL(4,1),"
+        + "rh DECIMAL(4,1)"
+        + ");";
+        
+    const create_sensors_table = "CREATE TABLE IF NOT EXISTS "
+        + `node_${id}_sensors (`
+        + "sensor SERIAL PRIMARY KEY,"
+        + "name VARCHAR(20)"
+        + ");";
+
+    try {
+        const [results, fields] = await connection.query(create_data_table);
+        const [sensors_results, sensors_fields] = await connection.query(create_sensors_table);
+        console.log(results); // results contains rows returned by server
+        console.log(fields);  // fields contains extra meta data about results, if available
+        res.status(200).send(results, sensors_results);
+    }
+    catch (err) {
+        res.status(500).send(err.stack);
+        throw err;
+    }
+});
 
 
 // Display index.html as landing page to show the app is running.
