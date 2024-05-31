@@ -100,3 +100,9 @@ Frontend:
 ### POST
 
 - `/new/node` - Creates a new node_0 and node_0_sensors, in case something had happened to them.
+
+- `/data/:node` - Adds a new data point in the indicated node. Values of `sensor_id`, `temp`, `rh` are passed as json args in the request body.
+
+    ```bash
+    curl -X POST http://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+    ```
