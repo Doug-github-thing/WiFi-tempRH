@@ -6,23 +6,26 @@ App is up at [https://temprh.vercel.app/](https://temprh.vercel.app/)
 ## Data flow
 1. Temp/RH data is acquired from a sensor connected to an ESP8266 module.
 
-2. The ESP8266 sends its data via an HTTP POST request to a locally (sensor_backend) hosted ExpressJS server which is running on a Raspberry Pi connected to the same WiFi network, using the Pi's local ip address.
+TODO: Update this for new Node-based architecture, and new central AWS EC2 hosted backend.
 
-3. The Raspberry Pi hosted sensor_backend server attaches a timestamp, formats the data, and forwards it on to a PostgreSQL database, hosted by ElephantSQL.  
+<!-- 
+1. The ESP8266 sends its data via an HTTP POST request to a locally (sensor_backend) hosted ExpressJS server which is running on a Raspberry Pi connected to the same WiFi network, using the Pi's local ip address.
 
-4. A separate cloud hosted ExpressJS server (hosted on Vercel) will simultaneously connect to this ElephantSQL database, and act as the middleman connecting the web frontend to the data store.
+1. The Raspberry Pi hosted "node" server formats the data and forwards it onto the global backend, which hands .  
 
-5. The final web frontend will make ReSTful requests to the web backend for data to display.
+1. A separate cloud hosted ExpressJS server (hosted in an AWS EC2 instance) will simultaneously connect to this RDS database, and act as the middleman connecting the web frontend to the data store.
+
+1. The final web frontend will make ReSTful requests to the web backend for data to display. -->
 
 This architecture leaves room for future expansion by adding an arbitrarily large number of sensor boards, and simply adding a new SQL table for each unique board ID.
 
 Data acquisition:
 
-- `Data acquired by the sensor board -> Pushed to sensor_backend server - > Sent to PostgreSQL server`
+- `Data acquired by the sensor board -> Pushed to sensor_backend server - > Sent to MySQL server`
 
 Data retrieval:
 
-- `PostgreSQL server stores data -> Pulled from web_backend -> Pulled from web_frontend -> Displayed on screen`
+- `MySQL server stores data -> Pulled from web_backend -> Pulled from web_frontend -> Displayed on screen`
 
 ## Database Structure
 
