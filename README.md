@@ -55,6 +55,11 @@ Tables:
 
 ## Updates
 
+### 5/30/24
+- Data currently stored in 2 tables, `node_0`, and `node_0_sensors`. Access list of sensors with GET `/node/0`, and list of data for a given sensor with GET `/node/0/:sensor_id`. Supports variable node numbers as well, for when additional nodes are added.
+
+- Add sensor data points with new POST `/data/:node` + body route.
+
 ### 5/29/24
 ElephantSQL announced EOL for PostgreSQL server hosting. Beginning migration to AWS RDS and MySQL for data hosting.
 As of 5/29/24, spun up an EC2 instance, connected to an RDS instance. The EC2 instance hosts the backend server, and is accessible at `http://temprh-backend.duckdns.org:3333/all`. This dumps the current contents of the single placeholder table in the RDS.
