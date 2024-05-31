@@ -47,15 +47,34 @@ app.listen(port, () => {
 
 
 /** 
- * Dumps all data from the database.
- * GET '/all'
+ * Gets all tables from the database.
+ * GET '/tables'
  */
-app.get('/all', async (req, res) => {
- 
+app.get('/tables', async (req, res) => {
     const connection = await getConnection();
+    executeQuery(connection, "SHOW TABLES;", req, res);
+});
 
-    const my_query = "SELECT * FROM bwa;";
- 
+
+/** 
+ * Gets the ids and names of each sensor in a given node.
+ * GET '/node/:node'
+ */
+app.get('/node/:node', async (req, res) => {
+    const connection = await getConnection();
+    const node = parseInt(req.params.node);
+    const my_query = `SELECT * FROM node_${node}_sensors`;
+    executeQuery(connection, my_query, req, res);
+});
+/** 
+ * Gets all data for given sensor in a given node.
+ * GET '/node/:node'
+*/
+app.get('/node/:node/:sensor', async (req, res) => {
+    const connection = await getConnection();
+    const node = parseInt(req.params.node);
+    const sensor = parseInt(req.params.sensor);
+    const my_query = `SELECT * FROM node_${node} WHERE sensor_id=${sensor}`;
     executeQuery(connection, my_query, req, res);
 });
 
@@ -75,8 +94,8 @@ app.post('/new/node', async (req, res) => {
     // Build query
     const create_data_table = "CREATE TABLE IF NOT EXISTS "
         + `node_${id} (`
-        + "ID SERIAL PRIMARY KEY,"
-        + "sensor INT,"
+        + "id SERIAL PRIMARY KEY,"
+        + "sensor_id INT,"
         + "timestamp TIMESTAMP,"
         + "temp DECIMAL(4,1),"
         + "rh DECIMAL(4,1)"
@@ -84,8 +103,8 @@ app.post('/new/node', async (req, res) => {
         
     const create_sensors_table = "CREATE TABLE IF NOT EXISTS "
         + `node_${id}_sensors (`
-        + "sensor SERIAL PRIMARY KEY,"
-        + "name VARCHAR(20)"
+        + "sensor_id SERIAL PRIMARY KEY,"
+        + "name VARCHAR(50)"
         + ");";
 
     try {
