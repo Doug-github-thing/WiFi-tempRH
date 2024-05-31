@@ -8,6 +8,7 @@ App is up at [https://temprh.vercel.app/](https://temprh.vercel.app/)
 
 TODO: Update this for new Node-based architecture, and new central AWS EC2 hosted backend.
 
+
 <!-- 
 1. The ESP8266 sends its data via an HTTP POST request to a locally (sensor_backend) hosted ExpressJS server which is running on a Raspberry Pi connected to the same WiFi network, using the Pi's local ip address.
 
