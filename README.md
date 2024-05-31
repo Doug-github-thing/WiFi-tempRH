@@ -30,9 +30,26 @@ Tables:
 
 1. node#_sensors (id PRIMARY KEY, name)
 
-1. node#_data (id PRIMARY KEY, sensor_id, unix timestamp, temp, rh)
+    ```sql
+    CREATE TABLE IF NOT EXISTS node_'#'_sensors (
+        sensor_id SERIAL PRIMARY KEY,
+        name VARCHAR(50)
+    );
+    ```
 
-    - id tracks the entry in the table
+1. node# (id PRIMARY KEY, sensor, unix timestamp, temp, rh)
+
+    ```sql
+    CREATE TABLE IF NOT EXISTS node_'id' (
+        id SERIAL PRIMARY KEY,
+        sensor_id INT,
+        timestamp TIMESTAMP,
+        temp DECIMAL(4,1),
+        rh DECIMAL(4,1)
+    );
+    ```
+
+    - id tracks the number of this node
     - sensor_id tracks which sensor module the data came from. Used when pulling data from specific sensors.
     - timestamp, temp, rh do what they say
 
@@ -58,8 +75,6 @@ Arduino sends dummy placeholder data to locally hosted NodeJS server, which prin
 
 ## TO-DO
 
-### General
-
 Backend:
 
 - Build new schema for RDS. Rewrite backend routes from PostgreSQL to MySQL.
@@ -72,10 +87,16 @@ Frontend:
 
 - needs the function to select which sensor ID to view, from a list of all valid sensor IDs.
 
-## Needed Routes
+## Current Backend Routes
 
-- /nodes - Gets a list of all nodes
+### Get
 
-- /node:sensor - Gets a list of all sensor ids and names for a given node
+- `/tables` - Returns a list of tables in the database
 
-- /current/node:sensor - Gets current value for a specific sensor
+- `/node/:node` - Gets the ids and names of each sensor in a given node.
+
+- `/node/:node` - Gets all data for given sensor in a given node.
+
+### POST
+
+- `/new/node` - Creates a new node_0 and node_0_sensors, in case something had happened to them.
