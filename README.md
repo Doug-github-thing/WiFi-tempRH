@@ -95,7 +95,7 @@ Frontend:
 
 - `/node/:node` - Gets the ids and names of each sensor in a given node.
 
-- `/node/:node` - Gets all data for given sensor in a given node.
+- `/node/:node/:sensor` - Gets all data for given sensor in a given node.
 
 ### POST
 
