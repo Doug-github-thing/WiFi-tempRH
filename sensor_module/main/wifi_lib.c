@@ -31,7 +31,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT      BIT1
 
 /* WiFi credentials are set up via the project configuration menu */
-static const char *TAG = "wifi config";
+static const char *TAG = "wifi";
 
 static int s_retry_num = 0;
 
@@ -57,6 +57,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
+
 
 void wifi_init_sta(void)
 {
@@ -120,21 +121,18 @@ void wifi_init_sta(void)
 
 
 /**
- * Sends an HTTP request at specified hostname with specified data.
+ * Sends TCP data to the specified host. Establishes a connection if needed.
  * 
  * @param sensor_id int identifier for this sensor
  * @param hostname String hostname
- * @param data Data to go inside json brakets. ie `"temp":69.9,"rh":42.0`
+ * @param port int 
+ * @param data String Data to send. ie `69.9;42.0`
  */
-static void http_send(int sensor_id, char *hostname, char* data) {
+static void tcp_send(int sensor_id, char *hostname, int port, char* data) {
 
-    char req_body_buffer[100];
-    snprintf(req_body_buffer, 100, "{\"sensor_id\":%d,%s}", sensor_id, data);
+    char location_buff[20]; /* Hostname and port, TCP connection endpoint */
+    snprintf(location_buff, 20, "%s:%d", hostname, port);
 
-    char host_buff[100];
-    snprintf(host_buff, 100, "%s/data/0/", hostname);
-
-
-    ESP_LOGI("wifi", "About to send data over http to %s", host_buff);
-    ESP_LOGI("wifi", "With JSON body: %s", req_body_buffer);
+    ESP_LOGI(TAG, "Establishing connection to: %s", location_buff);
+    ESP_LOGI(TAG, "Sending the following data: %s", data);
 }

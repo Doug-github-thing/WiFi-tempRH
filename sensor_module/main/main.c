@@ -18,8 +18,9 @@
 #include "i2c_lib.c"
 
 
-#define SENSOR_ID    2
-#define HOSTNAME     "http://temprh-backend.duckdns.org:3333"
+#define SENSOR_ID    2              /* Unique identifier of which module this is */
+#define HOSTNAME     "192.168.0.39" /* Hostname address of local sensor backend */
+#define PORT         55555          /* Port where sensor backend listens */
 
 void app_main()
 {
@@ -42,6 +43,6 @@ void app_main()
 
     ESP_LOGW("bwa", "Sensor read result: %s", reading_str_buffer);
     
-    http_send(SENSOR_ID, HOSTNAME, reading_str_buffer);
+    tcp_send(SENSOR_ID, HOSTNAME, PORT, reading_str_buffer);
 
 }
