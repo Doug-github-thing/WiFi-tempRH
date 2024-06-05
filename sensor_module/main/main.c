@@ -24,24 +24,25 @@
 
 void app_main()
 {
+
+    tcpip_adapter_ip_info_t my_wifi_info;
+
     ESP_ERROR_CHECK(nvs_flash_init());
-    wifi_init_sta();
+    setup_wifi_config(&my_wifi_info); // Connect to the access point
 
-    // Setup LED output pins
-    setup_gpio_out();
-    // Setup interrupt on BIP button
-    setup_gpio_in();
-
-    // Setup I2C pins on ESP
-    setup_i2c();
-    // Setup AHT20 for data reading
-    setup_aht20();
+    setup_gpio_out();           // Setup LED output pins
+    setup_gpio_in();            // Setup interrupt on BIP button
+        
+    setup_i2c();                // Setup I2C pins on ESP
+    setup_aht20();              // Setup AHT20 for data reading
 
     char reading_str_buffer[22];
-    // Read data from the AHT20
-    read_aht20(reading_str_buffer);
+    read_aht20(reading_str_buffer); // Read data from the AHT20, store in buffer
 
     ESP_LOGW("bwa", "Sensor read result: %s", reading_str_buffer);
+    
+    uint8_t mac[6];
+    setup_wifi_tcp(&my_wifi_info, SENSOR_ID, mac);
     
     tcp_send(SENSOR_ID, HOSTNAME, PORT, reading_str_buffer);
 

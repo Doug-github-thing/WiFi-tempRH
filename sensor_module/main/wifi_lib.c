@@ -20,7 +20,6 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
-
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
 
@@ -35,7 +34,7 @@ static const char *TAG = "wifi";
 
 static int s_retry_num = 0;
 
-static void event_handler(void* arg, esp_event_base_t event_base,
+static void event_handler(tcpip_adapter_ip_info_t* adapter_info, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
@@ -55,11 +54,16 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                  ip4addr_ntoa(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        // Capture current ip state and pass it back to the global tracker for adapter stuff,
+        // so the rest of the code can use it
+        adapter_info->ip = event->ip_info.ip;
+        adapter_info->gw = event->ip_info.gw;
+        adapter_info->netmask = event->ip_info.netmask;
     }
 }
 
 
-void wifi_init_sta(void)
+void setup_wifi_config(tcpip_adapter_ip_info_t* my_adapter_info)
 {
     s_wifi_event_group = xEventGroupCreate();
 
@@ -70,8 +74,8 @@ void wifi_init_sta(void)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, my_adapter_info));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, my_adapter_info));
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -120,19 +124,41 @@ void wifi_init_sta(void)
 }
 
 
+void setup_wifi_tcp(tcpip_adapter_ip_info_t* my_adapter_info, int SENSOR_ID, uint8_t* mac) {
+    ESP_LOGI(TAG, "Initializing TCP adapter");
+    ESP_ERROR_CHECK(tcpip_adapter_start(TCPIP_ADAPTER_IF_STA, mac, my_adapter_info));
+
+    tcpip_adapter_up(TCPIP_ADAPTER_IF_STA);
+
+    // Check what ip info is used to run the TCP adapter, and confirm it's the right one.
+    tcpip_adapter_ip_info_t my_ip_info;
+    tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &my_ip_info);
+    if (ip4addr_ntoa(&my_ip_info.ip) == ip4addr_ntoa(&my_adapter_info->ip)
+        && ip4addr_ntoa(&my_ip_info.gw) == ip4addr_ntoa(&my_adapter_info->gw)
+        && ip4addr_ntoa(&my_ip_info.netmask) == ip4addr_ntoa(&my_adapter_info->netmask))
+        ESP_LOGI(TAG, "TCP adapter is up on ip: %s", ip4addr_ntoa(&my_ip_info.ip));
+    else {
+        ESP_LOGE(TAG, "Error starting TCP adapter station");
+        return;
+    }
+
+        
+}
+
+
 /**
  * Sends TCP data to the specified host. Establishes a connection if needed.
  * 
  * @param sensor_id int identifier for this sensor
  * @param hostname String hostname
  * @param port int 
- * @param data String Data to send. ie `69.9;42.0`
+ * @param payload String Data to send. ie `69.9;42.0`
  */
-static void tcp_send(int sensor_id, char *hostname, int port, char* data) {
+static void tcp_send(int sensor_id, char *hostname, int port, char* payload) {
 
     char location_buff[20]; /* Hostname and port, TCP connection endpoint */
     snprintf(location_buff, 20, "%s:%d", hostname, port);
 
     ESP_LOGI(TAG, "Establishing connection to: %s", location_buff);
-    ESP_LOGI(TAG, "Sending the following data: %s", data);
+    ESP_LOGI(TAG, "Sending the following data: %s", payload);
 }
