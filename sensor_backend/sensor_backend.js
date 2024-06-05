@@ -50,7 +50,7 @@ app.post('/data', (req, res) => {
 
     // Passes SQL query to the database
     console.log(`parsed data. ${timestamp}, ${data.temp}, ${data.rh}`);
-    res.status(200).send(`Success:${formattedTime}`);
+    res.status(200).send(`Success:${getHHMMSS()}`);
 });
 
 
