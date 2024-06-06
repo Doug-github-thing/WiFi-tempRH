@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const app = express();
 const body_parser = require('body-parser');
 app.use(body_parser.json());
@@ -43,6 +44,8 @@ app.get('/', (req, res) => {
  * SS is the current amount of seconds
  */
 app.post('/data', (req, res) => {
+    console.log("got:");
+    console.log(req.body);
     // Parses values from incoming data from sensor module, 
     // and current timestamp to send to the database
     const timestamp = getTimestamp();
@@ -50,6 +53,48 @@ app.post('/data', (req, res) => {
 
     // Passes SQL query to the database
     console.log(`parsed data. ${timestamp}, ${data.temp}, ${data.rh}`);
+
+
+    // http://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+        const json_data = JSON.stringify({
+            sensor_id: data.id,
+            timestamp: timestamp,
+            temp: data.temp,
+            rh: data.rh
+        });
+        const options = {
+            hostname: 'temprh-backend.duckdns.org',
+            port: 3333,
+            path: `/data/0`,
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(json_data)
+            }
+        };
+        const post = http.request(options, (res) => {
+            let responseBody = '';
+          
+            res.setEncoding('utf8');
+            res.on('data', (chunk) => {
+                responseBody += chunk;
+            });
+          
+            res.on('end', () => {
+                console.log('Response:', responseBody);
+            });
+        });
+          
+        post.on('error', (e) => {
+            console.error(`Problem with request: ${e.message}`);
+        });
+          
+        // Write data to request body
+        post.write(json_data);
+        post.end();
+
+
+    
     res.status(200).send(`Success:${getHHMMSS()}`);
 });
 
