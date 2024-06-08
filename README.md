@@ -84,6 +84,10 @@ Arduino sends dummy placeholder data to locally hosted NodeJS server, which prin
 
 ## TO-DO
 
+Sensor:
+
+- Needs graceful handling for errors querying data from the AHT20
+
 Backend:
 
 - Build new schema for RDS. Rewrite backend routes from PostgreSQL to MySQL.

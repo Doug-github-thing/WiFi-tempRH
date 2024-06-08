@@ -96,11 +96,10 @@ static int read_aht20(char *result_buff) {
     ret = i2c_master_cmd_begin(I2C_PORT_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
 
-    // TODO
-    // if (ret != ESP_OK) {
-    //     ESP_LOGW("i2c", "Error querying AHT20 sensor");
-    //     return ret;
-    // }
+    if (ret != ESP_OK) {
+        ESP_LOGW("i2c", "Error querying AHT20 sensor");
+        return ret;
+    }
 
     // Datasheet recommends 80ms delay after asking for data for the sensor to take a reading
     vTaskDelay(800 / portTICK_RATE_MS); 
@@ -118,20 +117,19 @@ static int read_aht20(char *result_buff) {
     ret = i2c_master_cmd_begin(I2C_PORT_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
 
-    // TODO
-    // if (ret != ESP_OK) {
-    //     ESP_LOGW("i2c", "Error reading result from AHT20 sensor");
-    //     return ret;
-    // }
+    if (ret != ESP_OK) {
+        ESP_LOGW("i2c", "Error reading result from AHT20 sensor");
+        return ret;
+    }
 
     // Dummy placeholder values to test in lieu of real AHT20 data
-    data_buff[0] = 28;
-    data_buff[1] = 111;
-    data_buff[2] = 143;
-    data_buff[3] = 165;
-    data_buff[4] = 166;
-    data_buff[5] = 5;
-    data_buff[6] = 232;
+    // data_buff[0] = 28;
+    // data_buff[1] = 111;
+    // data_buff[2] = 143;
+    // data_buff[3] = 165;
+    // data_buff[4] = 166;
+    // data_buff[5] = 5;
+    // data_buff[6] = 232;
 
     parse_data(result_buff, data_buff);
 

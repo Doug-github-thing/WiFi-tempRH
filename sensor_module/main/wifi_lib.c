@@ -30,7 +30,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT      BIT1
 
 /* WiFi credentials are set up via the project configuration menu */
-static const char *TAG = "wifi";
+static const char *WIFI_TAG = "wifi";
 
 static int s_retry_num = 0;
 
@@ -43,14 +43,14 @@ static void event_handler(tcpip_adapter_ip_info_t* adapter_info, esp_event_base_
         if (s_retry_num < CONFIG_ESP_MAXIMUM_RETRY) {
             esp_wifi_connect();
             s_retry_num++;
-            ESP_LOGI(TAG, "retry to connect to the AP");
+            ESP_LOGI(WIFI_TAG, "retry to connect to the AP");
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
-        ESP_LOGI(TAG,"connect to the AP fail");
+        ESP_LOGI(WIFI_TAG,"connect to the AP fail");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:%s",
+        ESP_LOGI(WIFI_TAG, "got ip:%s",
                  ip4addr_ntoa(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
@@ -96,7 +96,7 @@ void setup_wifi_config(tcpip_adapter_ip_info_t* my_adapter_info)
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
 
-    ESP_LOGI(TAG, "wifi_init_sta finished.");
+    ESP_LOGI(WIFI_TAG, "wifi_init_sta finished.");
 
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
@@ -109,56 +109,16 @@ void setup_wifi_config(tcpip_adapter_ip_info_t* my_adapter_info)
     /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+        ESP_LOGI(WIFI_TAG, "connected to ap SSID:%s password:%s",
                  CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
     } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+        ESP_LOGI(WIFI_TAG, "Failed to connect to SSID:%s, password:%s",
                  CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
     } else {
-        ESP_LOGE(TAG, "UNEXPECTED EVENT");
+        ESP_LOGE(WIFI_TAG, "UNEXPECTED EVENT");
     }
 
     ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
     ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
     vEventGroupDelete(s_wifi_event_group);
-}
-
-
-void setup_wifi_tcp(tcpip_adapter_ip_info_t* my_adapter_info, int SENSOR_ID, uint8_t* mac) {
-    ESP_LOGI(TAG, "Initializing TCP adapter");
-    ESP_ERROR_CHECK(tcpip_adapter_start(TCPIP_ADAPTER_IF_STA, mac, my_adapter_info));
-
-    tcpip_adapter_up(TCPIP_ADAPTER_IF_STA);
-
-    // Check what ip info is used to run the TCP adapter, and confirm it's the right one.
-    tcpip_adapter_ip_info_t my_ip_info;
-    tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &my_ip_info);
-    if (ip4addr_ntoa(&my_ip_info.ip) == ip4addr_ntoa(&my_adapter_info->ip)
-        && ip4addr_ntoa(&my_ip_info.gw) == ip4addr_ntoa(&my_adapter_info->gw)
-        && ip4addr_ntoa(&my_ip_info.netmask) == ip4addr_ntoa(&my_adapter_info->netmask))
-        ESP_LOGI(TAG, "TCP adapter is up on ip: %s", ip4addr_ntoa(&my_ip_info.ip));
-    else {
-        ESP_LOGE(TAG, "Error starting TCP adapter station");
-        return;
-    }
-
-        
-}
-
-
-/**
- * Sends TCP data to the specified host. Establishes a connection if needed.
- * 
- * @param sensor_id int identifier for this sensor
- * @param hostname String hostname
- * @param port int 
- * @param payload String Data to send. ie `69.9;42.0`
- */
-static void tcp_send(int sensor_id, char *hostname, int port, char* payload) {
-
-    char location_buff[20]; /* Hostname and port, TCP connection endpoint */
-    snprintf(location_buff, 20, "%s:%d", hostname, port);
-
-    ESP_LOGI(TAG, "Establishing connection to: %s", location_buff);
-    ESP_LOGI(TAG, "Sending the following data: %s", payload);
 }

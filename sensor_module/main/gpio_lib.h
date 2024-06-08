@@ -19,8 +19,10 @@
 
 
 static void toggle_led(void);
-static void gpio_isr_handler(void *arg);
-static void queue_handle(void *arg);
+static void gpio_isr_handler(void *);
+static void queue_handle(void (*)());
+static void adc_task(void);
 
-void setup_gpio_in();
-void setup_gpio_out();
+void setup_gpio_in(void *);
+void setup_gpio_out(void);
+static void setup_adc(void);
