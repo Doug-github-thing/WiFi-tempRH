@@ -132,6 +132,5 @@ static void setup_adc(void) {
     adc_config.clk_div = 8; // ADC sample collection clock = 80MHz/clk_div = 10MHz
     ESP_ERROR_CHECK(adc_init(&adc_config));
 
-    // xTaskCreate(adc_task, "adc_task", 1024, NULL, 5, NULL);
     xTaskCreate(adc_task, "adc_task", 2048, NULL, 10, NULL);
 }
