@@ -99,7 +99,7 @@ static void queue_handle(void (*function_ptr)()) {
 
 
 static void adc_task(void) {
-    uint32_t adc_data;
+    uint16_t adc_data;
     bool previous_high = false;
     while (1) {
         vTaskDelay(200 / portTICK_RATE_MS);
