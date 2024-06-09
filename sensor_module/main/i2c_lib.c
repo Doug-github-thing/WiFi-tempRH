@@ -122,9 +122,6 @@ static int setup_eeprom() {
         return ret;
     }
     ESP_LOGI("i2c", "EEPROM connected successfully");
-    for(int i = 0; i<15; i++)
-        ESP_LOGW("i2c", "Read data: %u", read_buffer[i]);
-    ESP_LOGW("i2c", "Read data: %u", last_byte);
     return ESP_OK;
 }
 
@@ -132,6 +129,7 @@ static int setup_eeprom() {
 /**
  * Read from the M24C24 EEPROM module.
  * @param byte_addr 16 bit byte address in EEPROM to read
+ * @param byte_cnt How many bytes to read from memory
  * @param uint8_t Byte buffer where reading of memory at that location is stored
  * From the datasheet:
  *  - Address based on wiring: 0b1010000, or 0x50
@@ -139,25 +137,33 @@ static int setup_eeprom() {
  *  - Device Select byte for READ operation:
  *      1 0 1 0 | 0 0 0 | 1, or 0xA1
  */
-static int read_byte_eeprom(uint16_t byte_addr, uint8_t* result_buffer) {
-    ESP_LOGI("i2c", "Preparing to query EEPROM at address %u", byte_addr);
+static int read_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* result_buffer) {
+    ESP_LOGI("i2c", "Preparing to query EEPROM at address 0x%04x", byte_addr);
 
-    uint8_t device_select = I2C_EEPROM_ADDR << 1 | I2C_READ_BIT; // EEPROM addr + Read/Write bit
+    uint8_t dev_select_read  = I2C_EEPROM_ADDR << 1 | I2C_READ_BIT;  // EEPROM addr + Read/Write bit
+    uint8_t dev_select_write = I2C_EEPROM_ADDR << 1 | I2C_WRITE_BIT; // EEPROM addr + Read/Write bit
+    uint8_t read_buffer[byte_cnt];
+    uint8_t *last_byte;
 
     int ret;    // Return status
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, device_select, ACK_CHECK_EN); // Send I2C address
-    // i2c_master_write_byte(cmd, 0xA1, ACK_CHECK_EN); // Send 0xAC Command
-    i2c_master_stop(cmd);
+    i2c_master_start(cmd);                                               // 1. I2C start command
+    i2c_master_write_byte(cmd, dev_select_write, ACK_CHECK_EN);          // 2. Send I2C address + read
+    i2c_master_write_byte(cmd, (byte_addr & 0xff00) >> 8, ACK_CHECK_EN); // 3. Send read address byte1
+    i2c_master_write_byte(cmd, (byte_addr & 0x00ff),      ACK_CHECK_EN); // 4. Send read address byte2
+    i2c_master_start(cmd);                                               // 5. I2C start command
+    i2c_master_write_byte(cmd, dev_select_read, ACK_CHECK_EN);           // 6. Send I2C address + read
+    if (byte_cnt > 0)
+        i2c_master_read(cmd, read_buffer, byte_cnt - 1, ACK_CHECK_EN);   // 7. Read data into read buffer
+    i2c_master_read(cmd, &read_buffer[byte_cnt-1], 1, ACK_CHECK_DIS);    // 7. Read data into read buffer
+    i2c_master_stop(cmd);                                                // 8. Stop command
     ret = i2c_master_cmd_begin(I2C_PORT_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
 
     if (ret != ESP_OK) {
-        ESP_LOGE("i2c", "Error sending to EEPROM module");
+        ESP_LOGE("i2c", "Error reading from EEPROM module");
         return ret;
     }
-    ESP_LOGI("i2c", "gwar");
     return ESP_OK;
 }
 

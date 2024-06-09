@@ -44,6 +44,10 @@ void app_main()
     setup_i2c();                       // Setup I2C pins on ESP
     setup_aht20();                     // Setup AHT20 for data reading
     setup_eeprom();
+    uint8_t read_buffer[8];
+    read_eeprom(0x1234, 8, read_buffer);
+    for (int i = 0; i<8; i++)
+        ESP_LOGW("i2c", "Read data: %u", read_buffer[i]);
 
     // char reading_str_buffer[22];
     // read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer

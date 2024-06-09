@@ -33,5 +33,5 @@ static int setup_eeprom(void);
 
 static int read_aht20(char *);
 static void parse_aht20_data(char *, uint8_t *);
-static int read_byte_eeprom(uint16_t, uint8_t*);
+static int read_eeprom(uint16_t, int, uint8_t*);
 // tail
