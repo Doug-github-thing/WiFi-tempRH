@@ -59,6 +59,15 @@ Tables:
 
 ## Updates
 
+### 6/9/24
+- Custom ESP8266 sensor board is set up to read data from peripherals, written with Expressif ESP8266 SDK toolchain:
+
+1. GPIO pins for button interrupts and onboard LED indicators
+1. I2C interface AHT20 temp/humidity sensor module
+1. ESP-12F onboard WiFi for sending sensor data to the backend
+1. I2C interface EEPROM module for offline data storage
+1. ADC input to detect leaks with variable resistor leak sensor
+
 ### 5/30/24
 - Data currently stored in 2 tables, `node_0`, and `node_0_sensors`. Access list of sensors with GET `/node/0`, and list of data for a given sensor with GET `/node/0/:sensor_id`. Supports variable node numbers as well, for when additional nodes are added.
 
@@ -83,6 +92,11 @@ Arduino sends dummy placeholder data to locally hosted NodeJS server, which prin
 
 
 ## TO-DO
+
+Sensor:
+
+- Write logic for compressing data into bit efficient bytes to store in EEPROM, and mark stored data based on whether or not it was successfully sent over wifi. 
+    - I want to prevent data gaps by having the sensors attempt to send stored sensor data every time it sends a new reading, only stopping this once it receives a response from the server indicating that the data has been added to the database successfully.
 
 Backend:
 
