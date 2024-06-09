@@ -1,19 +1,14 @@
 require('dotenv').config();
 const express = require('express');
-const pg = require('pg');
+const http = require('http');
 const app = express();
 const body_parser = require('body-parser');
 app.use(body_parser.json());
 
-const pg_client = process.env.MY_ELEPHANTSQL_URL;
-const db = new pg.Client(pg_client);
+// const pg_client = process.env.MY_ELEPHANTSQL_URL;
+// const db = new pg.Client(pg_client);
 
-const port = 3333;
-
-
-// Connect to the database on startup.
-// Crashes the whole app if unable to connect to the database, so it can be restarted
-databaseConnect();
+const port = 55555;
 
 
 // Start listening for any incoming traffic.
@@ -49,50 +44,60 @@ app.get('/', (req, res) => {
  * SS is the current amount of seconds
  */
 app.post('/data', (req, res) => {
-
+    console.log("got:");
+    console.log(req.body);
     // Parses values from incoming data from sensor module, 
     // and current timestamp to send to the database
     const timestamp = getTimestamp();
     const data = req.body;
 
-    // Makes sure the table exists before attempting to add data to it
-    createTable(data.id);
+    // Passes SQL query to the database
+    console.log(`parsed data. ${timestamp}, ${data.temp}, ${data.rh}`);
 
-    // Builds SQL query
-    const my_query = `INSERT INTO TempRH_${data.id} (timestamp, temp, rh) VALUES (`
-                    + `'${timestamp}',`
-                    + `'${data.temp}',`
-                    + `'${data.rh}');`;
-    console.log("Attempting to run: " + my_query);
 
-    // Passes SQL query to ElephantSQL connection
-    db.query(my_query, function(err, result) {
-      if(err) {
-        res.status(500).send(`Error adding (${data.temp}, ${data.rh}) to TempRH_${data.id}`);  
-        return console.error(`Error running query: ${err}`);
-      }
+    // http://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+        const json_data = JSON.stringify({
+            sensor_id: data.id,
+            timestamp: timestamp,
+            temp: data.temp,
+            rh: data.rh
+        });
+        const options = {
+            hostname: 'temprh-backend.duckdns.org',
+            port: 3333,
+            path: `/data/0`,
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(json_data)
+            }
+        };
+        const post = http.request(options, (res) => {
+            let responseBody = '';
+          
+            res.setEncoding('utf8');
+            res.on('data', (chunk) => {
+                responseBody += chunk;
+            });
+          
+            res.on('end', () => {
+                console.log('Response:', responseBody);
+            });
+        });
+          
+        post.on('error', (e) => {
+            console.error(`Problem with request: ${e.message}`);
+        });
+          
+        // Write data to request body
+        post.write(json_data);
+        post.end();
 
-      const formattedTime = getHHMMSS();
-      res.status(200).send(`Success:${formattedTime}`);
-    });
+
+    
+    res.status(200).send(`Success:${getHHMMSS()}`);
 });
 
-
-/**
- * Crashes the whole app if unable to connect to the database, so it can be restarted.
- */
-function databaseConnect() {
-    console.log("Attempting to connect to the database");
-
-    db.connect(function(err) {
-        if(err) {
-            console.error(`Could not connect to postgres: ${err}`);
-            console.log("Aborting execution due to postgres connection failure");
-            process.exit(1);
-        }
-    });
-}
-  
 
 /**
  * @param id The ID of the sensor module
