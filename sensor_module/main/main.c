@@ -41,8 +41,11 @@ void app_main()
 
     ESP_LOGI("main", "ESP booted. Starting peripherals");
 
-    // tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
-    // setup_wifi_config(&my_wifi_info);  // Connect to the access point
+    tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
+    setup_wifi_config(&my_wifi_info);     // Connect to the access point
+
+    // Initialize timestamp tracking for data logging
+    setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
 
     // setup_i2c();                       // Setup I2C pins on ESP
     // setup_aht20();                     // Setup AHT20 for data reading
