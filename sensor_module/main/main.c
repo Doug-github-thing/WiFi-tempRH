@@ -44,15 +44,19 @@ void app_main()
     setup_i2c();                       // Setup I2C pins on ESP
     setup_aht20();                     // Setup AHT20 for data reading
     setup_eeprom();
-    uint8_t read_buffer[8];
-    read_eeprom(0x1234, 8, read_buffer);
-    for (int i = 0; i<8; i++)
-        ESP_LOGW("i2c", "Read data: %u", read_buffer[i]);
+
+    uint8_t write_buffer[4] = "bean";
+    write_eeprom(0x0000, 4, write_buffer);
+
+    uint8_t read_buffer[4];
+    read_eeprom(0x0000, 4, read_buffer);
+    ESP_LOGW("eeprom", "Read the following from eeprom:");
+    ESP_LOGW("eeprom", "address | byte");
+    for (int i = 0; i<4; i++)
+        ESP_LOGW("eeprom", " 0x%04x | %c", 0x0000 + i, read_buffer[i]);
 
     // char reading_str_buffer[22];
     // read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
-
-    // uint8_t 
 
     // setup_gpio_out();                  // Setup LED output pins
     // setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button
