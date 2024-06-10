@@ -5,9 +5,6 @@ const app = express();
 const body_parser = require('body-parser');
 app.use(body_parser.json());
 
-// const pg_client = process.env.MY_ELEPHANTSQL_URL;
-// const db = new pg.Client(pg_client);
-
 const port = 55555;
 
 
@@ -22,6 +19,14 @@ app.listen(port, () => {
  */
 app.get('/', (req, res) => {
     res.sendFile('index.html', { root: __dirname });
+});
+
+
+/**
+ * Replies with the number of seconds since 01Jan2024
+ */
+app.get('/timestamp', (req, res) => {
+    res.send(getTimestampSeconds());
 });
 
 
@@ -136,12 +141,12 @@ function getTimestamp() {
 
 
 /**
- * Gets the current time formatted as HH:MM:SS to send to the sensor board.
+ * Returns the time in seconds since 01Jan2024, to use as reference for the sensor board.
+ * This is essentially just the Unix timestamp, offset by 54 years, 
+ * since we're 54 years past the start of the Unix epoch!
  */
-function getHHMMSS() {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
+function getTimestampSeconds() {  
+    let now = Math.floor(Date.now() / 1000);
+    now -= 1704067200; // There are 1704067200 seconds between 01Jan1970 and 01Jan2024
+    return now.toPrecision();
 }

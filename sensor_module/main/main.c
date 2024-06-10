@@ -25,6 +25,9 @@
 #define POLL_INTERVAL  15             /* Time to wait between each reading, in minutes */
 
 
+uint32_t current_timestamp;           /* Holds the current time in seconds since 01Jan2024 */
+
+
 void read_data_and_send(void) {
     char reading_str_buffer[22];
     read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
@@ -38,26 +41,27 @@ void app_main()
 
     ESP_LOGI("main", "ESP booted. Starting peripherals");
 
-    tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
-    setup_wifi_config(&my_wifi_info);  // Connect to the access point
+    // tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
+    // setup_wifi_config(&my_wifi_info);  // Connect to the access point
 
-    setup_i2c();                       // Setup I2C pins on ESP
-    setup_aht20();                     // Setup AHT20 for data reading
-    setup_eeprom();
+    // setup_i2c();                       // Setup I2C pins on ESP
+    // setup_aht20();                     // Setup AHT20 for data reading
+    // setup_eeprom();
 
-    char reading_str_buffer[22];
-    read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
+    // char reading_str_buffer[22];
+    // read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
 
     setup_gpio_out();                  // Setup LED output pins
     setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button
-    setup_adc();                       // Setup ADC
+    // setup_adc();                       // Setup ADC
     
     ESP_LOGI("main", "Finished initializiation!");
 
     TickType_t previous_tick;
     while(1) {
         previous_tick = xTaskGetTickCount();
-        read_data_and_send();                   // Read data and send to the node 
-        vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS);
+        // read_data_and_send();                   // Read data and send to the node 
+        // vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS);
+        vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 1000 / portTICK_RATE_MS); // 30 seconds
     }
 }
