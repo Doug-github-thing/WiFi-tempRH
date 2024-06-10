@@ -26,7 +26,9 @@ app.get('/', (req, res) => {
  * Replies with the number of seconds since 01Jan2024
  */
 app.get('/timestamp', (req, res) => {
-    res.send(getTimestampSeconds());
+    const timestamp = getTimestampSeconds() 
+    console.log(`Serving timestamp ${timestamp}`);
+    res.send(timestamp);
 });
 
 
