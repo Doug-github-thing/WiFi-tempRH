@@ -38,36 +38,26 @@ void app_main()
 
     ESP_LOGI("main", "ESP booted. Starting peripherals");
 
-    // tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
-    // setup_wifi_config(&my_wifi_info);  // Connect to the access point
+    tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
+    setup_wifi_config(&my_wifi_info);  // Connect to the access point
 
     setup_i2c();                       // Setup I2C pins on ESP
     setup_aht20();                     // Setup AHT20 for data reading
     setup_eeprom();
 
-    uint8_t write_buffer[4] = "bean";
-    write_eeprom(0x0000, 4, write_buffer);
+    char reading_str_buffer[22];
+    read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
 
-    uint8_t read_buffer[4];
-    read_eeprom(0x0000, 4, read_buffer);
-    ESP_LOGW("eeprom", "Read the following from eeprom:");
-    ESP_LOGW("eeprom", "address | byte");
-    for (int i = 0; i<4; i++)
-        ESP_LOGW("eeprom", " 0x%04x | %c", 0x0000 + i, read_buffer[i]);
-
-    // char reading_str_buffer[22];
-    // read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
-
-    // setup_gpio_out();                  // Setup LED output pins
-    // setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button
-    // setup_adc();                       // Setup ADC
+    setup_gpio_out();                  // Setup LED output pins
+    setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button
+    setup_adc();                       // Setup ADC
     
     ESP_LOGI("main", "Finished initializiation!");
 
-    // TickType_t previous_tick;
-    // while(1) {
-    //     previous_tick = xTaskGetTickCount();
-    //     read_data_and_send();                   // Read data and send to the node 
-    //     vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS);
-    // }
+    TickType_t previous_tick;
+    while(1) {
+        previous_tick = xTaskGetTickCount();
+        read_data_and_send();                   // Read data and send to the node 
+        vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS);
+    }
 }
