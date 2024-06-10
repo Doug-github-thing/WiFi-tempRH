@@ -246,13 +246,13 @@ static int read_aht20(char *result_buff) {
     }
 
     // Dummy placeholder values to test in lieu of real AHT20 data
-    data_buff[0] = 28;
-    data_buff[1] = 111;
-    data_buff[2] = 143;
-    data_buff[3] = 165;
-    data_buff[4] = 166;
-    data_buff[5] = 5;
-    data_buff[6] = 232;
+    // data_buff[0] = 28;
+    // data_buff[1] = 111;
+    // data_buff[2] = 143;
+    // data_buff[3] = 165;
+    // data_buff[4] = 166;
+    // data_buff[5] = 5;
+    // data_buff[6] = 232;
 
     parse_aht20_data(result_buff, data_buff);
 

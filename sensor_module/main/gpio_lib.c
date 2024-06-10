@@ -73,12 +73,9 @@ void setup_gpio_in(void *interrupt_fun) {
 }
 
 
-static void toggle_led(void) {
-    // ESP_LOGI("Blonk", "Blinktime");
-    int current = gpio_get_level(ONBOARD_BLUE);
-    gpio_set_level(ONBOARD_BLUE, current==0 ? 1 : 0);
-    // Slight delay after press so it doesn't double trigger
-    vTaskDelay(200 / portTICK_RATE_MS); 
+static void toggle_led(int gpio_pin) {
+    int current = gpio_get_level(gpio_pin);
+    gpio_set_level(gpio_pin, current==0 ? 1 : 0);
 }
 
 
@@ -92,7 +89,6 @@ static void queue_handle(void (*function_ptr)()) {
     uint32_t io_num;
     for (;;) 
         if (xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-            // toggle_led();
             (*function_ptr)();        // Execute "read and send" function from main
         }
 }
