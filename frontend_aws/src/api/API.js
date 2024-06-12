@@ -3,16 +3,17 @@ class API {
 
     // static backend_url = "http://192.168.0.47:3333";
     // static backend_url = "https://wifi-temprh-web-backend.vercel.app";
-    static backend_url = "http://temprh-backend.duckdns.org:3333/";
+    static backend_url = "https://temp-rh.duckdns.org/backend";
 
     
     /**
-     * Perform a GET request to the backend for the sensors owned by that node.
+     * Perform a GET request to the backend for the data on a given sensor by that node.
      * @node Number corresponding to the node to be queried
-     * @returns Promise of a list of json objects with members "sensor_id" and "name"
+     * @node Number corresponding to the sensor ID to be queried
+     * @returns Promise of a list of json objects
      */
-    static async getSensors(node) {
-        return await fetch(`${this.backend_url}/node`)
+    static async getData(node, sensor_id) {
+        return await fetch(`${this.backend_url}/node/${node}/${sensor_id}`)
             .then(response => response.json())
             .catch(error => console.error(error));
     }

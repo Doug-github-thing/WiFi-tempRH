@@ -33,6 +33,9 @@ body {
     overflow-y: scroll;
 }
 
+/* Remove the pesky bullet point from list items */
+li {list-style-type: none;}
+
 /* Format links */
 a {
     color: #05ffee;
