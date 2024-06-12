@@ -19,7 +19,7 @@
 #include "i2c_lib.c"
 
 
-#define SENSOR_ID      3              /* Unique identifier of which module this is */
+#define SENSOR_ID      6              /* Unique identifier of which module this is */
 #define HOSTNAME       "192.168.0.56" /* Hostname address of local sensor backend */
 #define PORT           55555          /* Port where sensor backend listens */
 #define POLL_INTERVAL  15             /* Time to wait between each reading, in minutes */
@@ -29,9 +29,10 @@ uint32_t current_timestamp;           /* Holds the current time in seconds since
 
 
 void read_data_and_send(void) {
-    char reading_str_buffer[22];
+    char reading_str_buffer[23];
     read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
     http_send(SENSOR_ID, HOSTNAME, PORT, reading_str_buffer);
+    ESP_LOGW("dummy numbers", "I generated these numbers: %s", reading_str_buffer);
 }
 
 
@@ -60,11 +61,20 @@ void app_main()
     
     ESP_LOGI("main", "Finished initializiation!");
 
+    // Wait until the first 30 minute or so
+    while (current_timestamp % 1800 > 30) {
+        setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT);
+        vTaskDelay(2000 / portTICK_RATE_MS);
+    }
+
     TickType_t previous_tick;
     while(1) {
+        // setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT);
         previous_tick = xTaskGetTickCount();
+        // if (current_timestamp % 1800 <= 5)   // If the current time is close enough to a 30 minute interval
         read_data_and_send();                   // Read data and send to the node 
-        vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS);
+        vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS); // 30 minutes
         // vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 1000 / portTICK_RATE_MS); // 30 seconds
+        // vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 33 / portTICK_RATE_MS); // ~1 second
     }
 }

@@ -246,13 +246,15 @@ static int read_aht20(char *result_buff) {
     }
 
     // Dummy placeholder values to test in lieu of real AHT20 data
-    // data_buff[0] = 28;
+    data_buff[0] = 28;
     // data_buff[1] = 111;
-    // data_buff[2] = 143;
-    // data_buff[3] = 165;
+    data_buff[1] = (uint8_t)esp_random();
+    data_buff[2] = 143;
+    data_buff[3] = 165;
     // data_buff[4] = 166;
-    // data_buff[5] = 5;
-    // data_buff[6] = 232;
+    data_buff[4] = (uint8_t)esp_random();
+    data_buff[5] = 5;
+    data_buff[6] = 232;
 
     parse_aht20_data(result_buff, data_buff);
 
@@ -298,6 +300,6 @@ static void parse_aht20_data(char *result_buff, uint8_t *data_buff) {
     float rh_float = (rh_signal * 100);
     rh_float = rh_float / (1<<20);
 
-    snprintf(result_buff, 22, "\"temp\":%3.1f,\"rh\":%3.1f", temp_float, rh_float);
+    snprintf(result_buff, 23, "\"temp\":%3.1f,\"rh\":%3.1f", temp_float, rh_float);
     return;
 }
