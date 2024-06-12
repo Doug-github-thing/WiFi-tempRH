@@ -1,0 +1,39 @@
+/* Set default rules for the whole app */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    align-items: center;
+    text-align: center;
+    color: #BADBED;
+}
+
+/* Format header
+    Tabular band with 3 elements: left, title, right.
+    Sized to keep the title in the center */
+.App-header {
+    height: 7vh; width: 100%; display: table;
+    background-color: #282c34; }
+.App-header #title {
+    width: 50%; display: table-cell; vertical-align: middle;
+    font-size: calc(5.5vmin); font-weight: 800; }
+.App-header #left { width: 25%; display: table-cell; vertical-align: middle; }
+.App-header #right { width: 25%; display: table-cell; vertical-align: middle; }
+
+/* Format main app page body */
+.App-body {
+    /* Confine space to the zone not taken up by the header */
+    position: absolute; top: 7vh; width: 100%; height: 93vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background-color: #3c414c;
+    font-size: calc(10px + 2vmin);
+    overflow-y: scroll;
+}
+
+/* Format links */
+a {
+    color: #05ffee;
+}
