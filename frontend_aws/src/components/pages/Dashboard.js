@@ -21,7 +21,7 @@ const Dashboard = () => {
         {!data ? "Connecting..." :
             <div className="dataWrapper">
                 {data.map((data) => (
-                  <li className='ListItem' key={data.timestamp}>
+                  <li className="ListItem" key={data.timestamp}>
                     <div>{data.temp}°F {data.rh}%RH</div>
                   </li>
                   )

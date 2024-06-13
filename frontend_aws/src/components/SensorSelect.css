@@ -1,0 +1,13 @@
+#dropdown {
+    position: absolute;
+    top: 7vmax;
+    left: 1%;
+    background-color: #282c34;
+    width: 50%;
+    height: min-content;
+    z-index: 100;
+}
+
+.dropdown-item:hover {
+    background-color: aqua;
+}

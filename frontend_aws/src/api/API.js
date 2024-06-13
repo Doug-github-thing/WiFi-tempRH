@@ -18,6 +18,12 @@ class API {
             .catch(error => console.error(error));
     }
 
+    static async getSensors(node) {
+        return await fetch(`${this.backend_url}/node/${node}`)
+            .then(response => response.json())
+            .catch(error => console.error(error));
+    }
+
     
     // // Perform a GET request to the backend for the current (most up-to-date temp/humidity)
     // static async getCurrent() {

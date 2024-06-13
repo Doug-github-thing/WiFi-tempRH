@@ -1,17 +1,13 @@
-import React, {useContext} from "react";
-
+import React, { useContext} from "react";
 import { AuthContext } from './context/Auth.context.js';
+import HeaderBar from "./components/HeaderBar.js";
 import Login from './components/pages/Login.js';
 import Dashboard from './components/pages/Dashboard';
-
 import "./index.css";
 
 const App = () => {
-      const { state, logout } = useContext(AuthContext);
-      const onLogout = (e) => {
-            e.preventDefault();
-            logout();
-      }
+      
+      const { state } = useContext(AuthContext);
 
       const getPage = () => {
             if (!state.isLoggedIn)
@@ -20,21 +16,9 @@ const App = () => {
                   return <Dashboard />;
       };
 
-      const getLoginStatusText = () => {
-            if (!state.isLoggedIn)
-                  return <></>;
-            else
-                  return (<>
-                        <div>Hello, {state.username}</div>
-                        <a href="#" onClick={onLogout}>sign out</a>
-                  </>);
-      };
-
       return (<>
             <div className="App-header">
-                  <div id="left"></div>
-                  <div id="title">Dog Monitor App</div>
-                  <div id="right">{getLoginStatusText()}</div>
+                  <HeaderBar />
             </div>
 
             <div className="App-body">

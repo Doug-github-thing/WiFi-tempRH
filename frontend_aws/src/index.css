@@ -26,11 +26,16 @@ body {
 /* Format main app page body */
 .App-body {
     /* Confine space to the zone not taken up by the header */
-    position: absolute; top: 7vh; width: 100%; height: 93vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: absolute;
+    top: 7vh;
+    width: 100%;
+    height: 93vh;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
     background-color: #3c414c;
     font-size: calc(10px + 2vmin);
-    overflow-y: scroll;
+    overflow-y:auto;
 }
 
 /* Remove the pesky bullet point from list items */
