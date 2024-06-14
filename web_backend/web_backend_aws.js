@@ -34,6 +34,7 @@ const executeQuery = async (connection, query, req, res) => {
         console.log(results); // results contains rows returned by server
         console.log(fields);  // fields contains extra meta data about results, if available
         res.status(200).send(results);
+        await 
     }
     catch (err) {
         res.status(500).send(err.stack);
@@ -72,6 +73,7 @@ app.listen(port, () => {
 app.get('/tables', async (req, res) => {
     const connection = await getConnection();
     executeQuery(connection, "SHOW TABLES;", req, res);
+    connection.end();
 });
 
 /** 
@@ -83,6 +85,7 @@ app.get('/node/:node', async (req, res) => {
     const node = parseInt(req.params.node);
     const my_query = `SELECT * FROM node_${node}_sensors`;
     executeQuery(connection, my_query, req, res);
+    connection.end();
 });
 
 /** 
@@ -95,6 +98,7 @@ app.get('/node/:node/:sensor', async (req, res) => {
     const sensor = parseInt(req.params.sensor);
     const my_query = `SELECT * FROM node_${node} WHERE sensor_id=${sensor}`;
     executeQuery(connection, my_query, req, res);
+    connection.end();
 });
 
 
@@ -126,6 +130,7 @@ app.post('/data/:node', async (req, res) => {
     const my_query = `INSERT INTO node_${node} VALUES (0, ?, ?, ?, ?);`;
     executeQueryPlaceholders(
         connection, my_query, [data.sensor_id, timestamp, data.temp, data.rh], req, res);
+    connection.end();
 });
 
 
@@ -163,9 +168,11 @@ app.post('/new/node', async (req, res) => {
         console.log(results); // results contains rows returned by server
         console.log(fields);  // fields contains extra meta data about results, if available
         res.status(200).send(results, sensors_results);
+        connection.end();
     }
     catch (err) {
         res.status(500).send(err.stack);
+        connection.end();
         throw err;
     }
 });
