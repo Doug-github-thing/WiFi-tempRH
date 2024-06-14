@@ -1,18 +1,19 @@
 import React, { useContext } from 'react';
 import { useEffect, useState } from 'react';
+import { AuthContext } from '../../context/Auth.context.js';
 import API from "../../api/API.js";
 
-import { AuthContext } from '../../context/Auth.context.js';
 
-const Dashboard = () => {
+const Dashboard = ({ selectedSensor }) => {
     const { state, logout } = useContext(AuthContext);
     const [data, setData] = useState(null);
     
 
-    // Fetch the new data on mount
+    // Fetch the new data when new sensor is selected
     useEffect(() => {
-        API.getData(0,4).then(json => setData(json));
-    }, []);
+        if (selectedSensor?.sensor_id != null)
+            API.getData(0,selectedSensor.sensor_id).then(json => setData(json));
+    }, [selectedSensor]);
     
 
     return (<>
@@ -21,11 +22,10 @@ const Dashboard = () => {
         {!data ? "Connecting..." :
             <div className="dataWrapper">
                 {data.map((data) => (
-                  <li className="ListItem" key={data.timestamp}>
-                    <div>{data.temp}°F {data.rh}%RH</div>
-                  </li>
-                  )
-                  )}
+                    <li className="ListItem" key={data.timestamp}>
+                        <div>{data.temp}°F {data.rh}%RH</div>
+                    </li>
+                ))}
             </div>
         }
 

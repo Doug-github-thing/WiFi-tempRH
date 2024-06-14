@@ -2,17 +2,15 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from '../context/Auth.context.js';
 import SensorSelect from "./SensorSelect.js";
 
-const HeaderBar = () => {
+const HeaderBar = ({ select, selectedSensor }) => {
     const { state, logout } = useContext(AuthContext);
+    // tracks which sensor is currently selected. { node: # , sensor_id: # }
+    // const [selectedSensor, setSelectedSensor] = useState(null); 
+
     const onLogout = (e) => {
         e.preventDefault();
         logout();
     }
-
-    // const toggleClicked = (e) => {
-    //     setDropdownClicked(dropdownClicked ? false: true);
-    //     console.log(dropdownClicked);
-    // }
 
     const getLoginStatusText = () => {
         if (state.isLoggedIn)
@@ -25,8 +23,8 @@ const HeaderBar = () => {
     };
 
     return (<>
-        <div id="left"><SensorSelect onClick={null}/></div>
-        <div id="title">Dog Monitor App</div>
+        <div id="left">{state.isLoggedIn && <SensorSelect select={select}/>}</div>
+        <div id="title">{selectedSensor?.name}</div>
         <div id="right">{getLoginStatusText()}</div>
     </>);
 }

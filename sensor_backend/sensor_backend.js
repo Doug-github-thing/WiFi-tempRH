@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
+const https = require('https');
 const app = express();
 const body_parser = require('body-parser');
 app.use(body_parser.json());
@@ -62,7 +62,7 @@ app.post('/data', (req, res) => {
     console.log(`parsed data. ${timestamp}, ${data.temp}, ${data.rh}`);
 
 
-    // http://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+    // https://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
         const json_data = JSON.stringify({
             sensor_id: data.id,
             timestamp: timestamp,
@@ -79,7 +79,7 @@ app.post('/data', (req, res) => {
             'Content-Length': Buffer.byteLength(json_data)
             }
         };
-        const post = http.request(options, (res) => {
+        const post = https.request(options, (res) => {
             let responseBody = '';
           
             res.setEncoding('utf8');
@@ -112,6 +112,7 @@ app.post('/data', (req, res) => {
  * Creates if not exists a table called "TempRH_<id>"
  */
 function createTable(id) {
+    // TODO update this to MySQL
     // Creates the TempRH table if it does not exist
     const my_query = "CREATE TABLE IF NOT EXISTS "
         + `TempRH_${id} (`
