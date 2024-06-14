@@ -70,9 +70,9 @@ app.post('/data', (req, res) => {
             rh: data.rh
         });
         const options = {
-            hostname: 'temprh-backend.duckdns.org',
-            port: 3333,
-            path: `/data/0`,
+            hostname: 'temp-rh.duckdns.org',
+            port: 443,
+            path: `/backend/data/0`,
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
