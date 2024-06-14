@@ -4,13 +4,16 @@ import SensorSelect from "./SensorSelect.js";
 
 const HeaderBar = ({ select, selectedSensor }) => {
     const { state, logout } = useContext(AuthContext);
-    // tracks which sensor is currently selected. { node: # , sensor_id: # }
-    // const [selectedSensor, setSelectedSensor] = useState(null); 
+
 
     const onLogout = (e) => {
         e.preventDefault();
         logout();
-    }
+    };
+
+    const getTitleText = () => {
+        return !selectedSensor ? "Title" : selectedSensor?.name;
+    };
 
     const getLoginStatusText = () => {
         if (state.isLoggedIn)
@@ -24,7 +27,7 @@ const HeaderBar = ({ select, selectedSensor }) => {
 
     return (<>
         <div id="left">{state.isLoggedIn && <SensorSelect select={select}/>}</div>
-        <div id="title">{selectedSensor?.name}</div>
+        <div id="title">{getTitleText()}</div>
         <div id="right">{getLoginStatusText()}</div>
     </>);
 }
