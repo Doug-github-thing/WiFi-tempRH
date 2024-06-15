@@ -32,6 +32,20 @@ Data retrieval:
 
 Tables:
 
+1. users (id PRIMARY KEY, name, nodes )
+    ```sql
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        user_id INT,
+        name VARCHAR(50),
+        node INT
+    );
+    ```
+    ```sql
+    INSERT INTO users (user_id, name, node) values (0, 'Dog', 0);
+    ```
+
+
 1. node#_sensors (id PRIMARY KEY, name)
 
     ```sql
@@ -40,6 +54,10 @@ Tables:
         name VARCHAR(50)
     );
     ```
+    ```sql
+    INSERT INTO node_1_sensors (name) values ('Shed');
+    ```
+
 
 1. node# (id PRIMARY KEY, sensor, unix timestamp, temp, rh)
 
