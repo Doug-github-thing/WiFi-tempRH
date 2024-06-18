@@ -22,7 +22,8 @@ const getConnection = async () => {
         user: process.env.DB_USER,
         password: process.env.DB_PWD,
         host: process.env.DB_ENDPOINT,
-        database: 'temprhdb'
+        port: process.env.DB_PORT,
+        database: process.env.DB_NAME
     });
 }
 /**
