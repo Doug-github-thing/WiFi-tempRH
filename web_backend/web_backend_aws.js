@@ -59,10 +59,15 @@ const executeQueryPlaceholders = async (connection, query, placeholders, req, re
 }
 
 
-
 // Initializes webserver app, and tells stdout
-app.listen(port, () => {
-      console.log(`Server is listening on port ${port}`);
+app.listen(port, async () => {
+
+    // Create a connection, then close it again. 
+    // Verifies connection is possible.
+    const connection = await getConnection();
+    connection.end();
+
+    console.log(`Server is listening on port ${port}`);
 });
 
 
