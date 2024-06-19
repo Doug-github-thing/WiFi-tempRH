@@ -110,10 +110,10 @@ void setup_wifi_config(tcpip_adapter_ip_info_t* my_adapter_info)
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(WIFI_TAG, "connected to ap SSID:%s",
-                 CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
+                 CONFIG_ESP_WIFI_SSID);
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(WIFI_TAG, "Failed to connect to SSID:%s",
-                 CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
+                 CONFIG_ESP_WIFI_SSID);
     } else {
         ESP_LOGE(WIFI_TAG, "UNEXPECTED EVENT");
     }
