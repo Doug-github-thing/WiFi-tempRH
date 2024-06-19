@@ -46,10 +46,6 @@ void app_main()
     tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
     setup_wifi_config(&my_wifi_info);     // Connect to the access point
 
-    // Initialize timestamp tracking for data logging
-    setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
-    setup_timer(&current_timestamp);      // Use timer to keep timestamp up to date 
-
     setup_i2c();                       // Setup I2C pins on ESP
     setup_aht20();                     // Setup AHT20 for data reading
     setup_eeprom();                    // Test connection to eeprom module
@@ -61,29 +57,29 @@ void app_main()
     setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button
     setup_adc();                       // Setup ADC
 
+    // Initialize timestamp tracking for data logging
+    setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
+    setup_timer(&current_timestamp); // Use timer to keep timestamp up to date, show alive LED
+
 
     ESP_LOGI("main", "Finished initializiation!");
 
-    // // Wait until the first 30 minute or so
-    while (current_timestamp % 1800 > 30) {
-        // setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT);
-        vTaskDelay(2000 / portTICK_RATE_MS);
-    }
 
-    TickType_t previous_tick;
-    bool flag = false;
+    bool already_done_this_minute = false;
     while(1) {
 
-        // // if within 30 seconds of a 30 minute point
-        // if (current_timestamp % 1800 <= 30) {
+        // If it's within 10 seconds of a 30 minute interval
+        // AND it hasn't taken a reading yet
+        if (!already_done_this_minute && current_timestamp % 900 <= 10) {
+            ESP_LOGI("loop", "The time is %u", current_timestamp+1704085200);
+            read_data_and_send();
+            already_done_this_minute = true;
+        }
+        // If no longer within 30 seconds of a 30 minute interval, clear the "done" flag
+        else if (current_timestamp % 900 > 10) 
+            already_done_this_minute = false;
 
-        //     flag = flag ? false : true; // flip flag value
-        // }
-
-        // setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT);
-        previous_tick = xTaskGetTickCount();
-        // if (current_timestamp % 1800 <= 5)   // If the current time is close enough to a 30 minute interval
-        read_data_and_send();                   // Read data and send to the node 
-        vTaskDelayUntil(&previous_tick, POLL_INTERVAL * 60000 / portTICK_RATE_MS);
+        // Wait 1 second
+        vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
