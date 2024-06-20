@@ -22,8 +22,9 @@ static const char *HTTP_TAG = "http";
  * @param sensor_id int identifier for this sensor
  * @param hostname String hostname of node backend
  * @param port int port of node backend
+ * @returns -1 on failure, 0 on success
  */
-static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *hostname, int port) {
+static int setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *hostname, int port) {
     // Format request
     char request[300];
     snprintf(request, 300,
@@ -32,7 +33,6 @@ static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *ho
         "User-Agent: WiFi-TempRHv2.0 Board# %d\r\n"
         "Accept: */*\r\n\r\n"
         , hostname, port, sensor_id);
-    // ESP_LOGI("timestamp request", "%s", request);
 
     const struct addrinfo hints = {
         .ai_family = AF_INET,
@@ -49,7 +49,7 @@ static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *ho
     if(err != 0 || res == NULL) {
         ESP_LOGE(HTTP_TAG, "DNS lookup failed err=%d res=%p", err, res);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
 
     addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
@@ -61,7 +61,7 @@ static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *ho
         ESP_LOGE(HTTP_TAG, "... Failed to allocate socket.");
         freeaddrinfo(res);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
 
     // Connect to the host
@@ -70,7 +70,7 @@ static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *ho
         close(s);
         freeaddrinfo(res);
         vTaskDelay(4000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
 
     freeaddrinfo(res);
@@ -80,9 +80,8 @@ static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *ho
         ESP_LOGE("timestamp", "... socket send failed");
         close(s);
         vTaskDelay(4000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
-    // ESP_LOGI("timestamp", "... socket send success");
 
     // Parse the response into received_number
     int r, number_counter;
@@ -111,6 +110,7 @@ static void setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *ho
     char* end;
     *current_timestamp = strtol(received_number, &end, 10);
     ESP_LOGI("timestamp", "Timestamp set to %u", *current_timestamp);
+    return 0;
 }
 
 
@@ -143,8 +143,9 @@ static void format_JSON_POST(char *request, int sensor_id, char *hostname, char*
  * @param hostname String hostname of node backend
  * @param port int port of node backend
  * @param payload String Data to send, as key value pairs. ie `"temp":69.1,"rh":42.0`
+ * @returns -1 on failure, 0 on success
  */
-static void http_send(int sensor_id, char *hostname, int port, char* payload) {
+static int http_send(int sensor_id, char *hostname, int port, char* payload) {
     // Format request
     char request[300];
     format_JSON_POST(request, sensor_id, hostname, payload);
@@ -165,7 +166,7 @@ static void http_send(int sensor_id, char *hostname, int port, char* payload) {
     if(err != 0 || res == NULL) {
         ESP_LOGE(HTTP_TAG, "DNS lookup failed err=%d res=%p", err, res);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
 
     addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
@@ -177,7 +178,7 @@ static void http_send(int sensor_id, char *hostname, int port, char* payload) {
         ESP_LOGE(HTTP_TAG, "... Failed to allocate socket.");
         freeaddrinfo(res);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
     ESP_LOGI(HTTP_TAG, "... allocated socket");
 
@@ -187,7 +188,7 @@ static void http_send(int sensor_id, char *hostname, int port, char* payload) {
         close(s);
         freeaddrinfo(res);
         vTaskDelay(4000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
 
     ESP_LOGI(HTTP_TAG, "... connected");
@@ -198,9 +199,10 @@ static void http_send(int sensor_id, char *hostname, int port, char* payload) {
         ESP_LOGE(HTTP_TAG, "... socket send failed");
         close(s);
         vTaskDelay(4000 / portTICK_PERIOD_MS);
-        return;
+        return -1;
     }
-    ESP_LOGI(HTTP_TAG, "... socket send success");
-    ESP_LOGI(HTTP_TAG, "... closing socket");
+    // ESP_LOGI(HTTP_TAG, "... socket send success");
+    // ESP_LOGI(HTTP_TAG, "... closing socket");
     close(s);
+    return 0;
 }

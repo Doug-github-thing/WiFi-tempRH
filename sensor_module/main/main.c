@@ -23,7 +23,6 @@
 #define SENSOR_ID      1              /* Unique identifier of which module this is */
 #define HOSTNAME       "192.168.0.56" /* Hostname address of local sensor backend */
 #define PORT           55555          /* Port where sensor backend listens */
-#define POLL_INTERVAL  30             /* Time to wait between each reading, in minutes */
 
 
 uint32_t current_timestamp;           /* Holds the current time in seconds since 01Jan2024 */
