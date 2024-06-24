@@ -8,6 +8,7 @@ import "./MainPage.css";
 const MainPage = ({ isDashboard, selectedSensor }) => {
     const { state, logout } = useContext(AuthContext);
     const [data, setData] = useState(null);
+    const [currentList, setCurrentList] = useState([]);
     
 
     // Fetch the new data when new sensor is selected
@@ -15,19 +16,34 @@ const MainPage = ({ isDashboard, selectedSensor }) => {
         if (selectedSensor?.sensor_id != null)
             API.getData(0,selectedSensor.sensor_id).then(json => setData(json));
     }, [selectedSensor]);
-
-
+    
+    
+    // Whenever the dashboard is reloaded, hit the backend again the get current values
+    useEffect(() => {
+        setCurrentList(API.getCurrent(0).then(json =>setCurrentList(json)));
+    }, [isDashboard]);
+    
+    
+    // Also do it on load
+    useEffect(() => {
+        setCurrentList(API.getCurrent(0).then(json => setCurrentList(json)));
+    }, [state.sensorList]);
+    
+    
     const getDashboard = () => {
         return <>
-
             <div>{state.sensorList?.map((sensor) => (
                 <li className="sensorCard" key={sensor.sensor_id}>
-
                     <div>{sensor.name}</div>
-
+                    {
+                        currentList[sensor.sensor_id-1] !== null 
+                            ?
+                        <div>{currentList[sensor.sensor_id-1]?.temp}°F {currentList[sensor.sensor_id-1]?.rh}%RH</div>
+                            :
+                        <div>Loading current data...</div>
+                    }
                 </li>
             ))}</div>
-
         </>
     };
 
