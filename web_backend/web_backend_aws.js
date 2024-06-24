@@ -106,6 +106,21 @@ app.get('/node/:node/:sensor', async (req, res) => {
     connection.end();
 });
 
+/** 
+ * Gets the most recent datapoint for a specified sensor module.
+ * Gets all data for given sensor in a given node.
+ * GET '/node/:node/:sensor'
+ */
+app.get('/current/:node/:sensor', (req, res) => {
+    const connection = await getConnection();
+    const node = parseInt(req.params.node);
+    const sensor = parseInt(req.params.sensor);
+    const my_query = 
+        `SELECT * FROM node_${node} WHERE sensor_id=${sensor} ORDER BY timestamp DESC LIMIT 1;`
+    executeQuery(connection, my_query, req, res);
+    connection.end();
+});
+
 
 /**
  * Listen for incoming POST traffic to push to the database.
@@ -186,22 +201,6 @@ app.post('/new/node', async (req, res) => {
 // Display index.html as landing page to show the app is running.
 app.get('/',function(req, res) {
     res.sendFile('index.html', { root: __dirname });
-});
-
-
-/** 
- * Gets the most recent datapoint for a specified sensor module.
- * GET '/current'
- * Content-type: application/JSON
- * Body:
- * {
- *  "id": <sensor_module_id> // Unique identifier for the sensor module
- * }
- */
-app.get('/current', (req, res) => {
-    // TODO Build SQL query
-    const my_query = "SELECT EXTRACT(epoch FROM timestamp) AS unix_timestamp, id, temp, rh " 
-                   + "FROM TempRH_1 ORDER BY id DESC LIMIT 1;";
 });
 
 
