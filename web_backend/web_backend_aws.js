@@ -109,14 +109,16 @@ app.get('/node/:node/:sensor', async (req, res) => {
 /** 
  * Gets the most recent datapoint for a specified sensor module.
  * Gets all data for given sensor in a given node.
- * GET '/node/:node/:sensor'
+ * GET '/node/:node'
  */
-app.get('/current/:node/:sensor', async (req, res) => {
+app.get('/current/:node', async (req, res) => {
     const connection = await getConnection();
     const node = parseInt(req.params.node);
     const sensor = parseInt(req.params.sensor);
     const my_query = 
-        `SELECT * FROM node_${node} WHERE sensor_id=${sensor} ORDER BY timestamp DESC LIMIT 1;`
+        // `SELECT * FROM node_${node} WHERE sensor_id=${sensor} ORDER BY timestamp DESC LIMIT 1;`
+        `SELECT * FROM node_0_sensors ns JOIN node_0 n ON ns.sensor_id = n.sensor_id 
+        WHERE n.timestamp = (SELECT MAX(n1.timestamp) FROM node_0 n1 WHERE n1.sensor_id = ns.sensor_id);`;   
     executeQuery(connection, my_query, req, res);
     connection.end();
 });
