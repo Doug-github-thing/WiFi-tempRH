@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useEffect, useState } from 'react';
 import { AuthContext } from '../../context/Auth.context.js';
 import API from "../../api/API.js";
+import "./MainPage.css";
 
 
 const MainPage = ({ isDashboard, selectedSensor }) => {
@@ -18,7 +19,15 @@ const MainPage = ({ isDashboard, selectedSensor }) => {
 
     const getDashboard = () => {
         return <>
-            <div>This is the dashboard</div>
+
+            <div>{state.sensorList?.map((sensor) => (
+                <li className="sensorCard" key={sensor.sensor_id}>
+
+                    <div>{sensor.name}</div>
+
+                </li>
+            ))}</div>
+
         </>
     };
 
@@ -42,16 +51,13 @@ const MainPage = ({ isDashboard, selectedSensor }) => {
     };
 
 
-    return (<>
-
+    return (<div className="mainPage">
         {isDashboard ?
             getDashboard()
                 :
             getSensorView()
         }
-
-
-    </>);
+    </div>);
 }
 
 export default MainPage;
