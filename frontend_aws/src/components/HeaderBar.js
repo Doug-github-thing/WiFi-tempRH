@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from '../context/Auth.context.js';
 import SensorSelect from "./SensorSelect.js";
 
-const HeaderBar = ({ select, selectedSensor }) => {
+const HeaderBar = ({ select, selectedSensor, dashboardActive, setDashboardActive}) => {
     const { state, logout } = useContext(AuthContext);
 
 
@@ -12,7 +12,10 @@ const HeaderBar = ({ select, selectedSensor }) => {
     };
 
     const getTitleText = () => {
-        return !selectedSensor ? "Title" : selectedSensor?.name;
+        if (dashboardActive)
+            return "Smarmy the smlanket with";    
+        else 
+            return !selectedSensor ? "Select a sensor" : selectedSensor?.name;
     };
 
     const getLoginStatusText = () => {
@@ -26,7 +29,7 @@ const HeaderBar = ({ select, selectedSensor }) => {
     };
 
     return (<>
-        <div id="left">{state.isLoggedIn && <SensorSelect select={select}/>}</div>
+        <div id="left">{state.isLoggedIn && <SensorSelect select={select} setDashboardActive={setDashboardActive}/>}</div>
         <div id="title">{getTitleText()}</div>
         <div id="right">{getLoginStatusText()}</div>
     </>);

@@ -20,14 +20,24 @@ body {
 .App-header #title {
     width: 50%; display: table-cell; vertical-align: middle;
     font-size: calc(5.5vmin); font-weight: 800; }
-.App-header #left { width: 25%; display: table-cell; vertical-align: middle; }
+.App-header #left  { width: 25%; display: table-cell; vertical-align: middle; }
 .App-header #right { width: 25%; display: table-cell; vertical-align: middle; }
+.App-sub-header {
+    height: 3vh; width: 100%; display: table;
+    background-color: #171a1e; }
+.App-sub-header #title {
+    width: 50%; display: table-cell; vertical-align: middle;
+    font-size: calc(5.5vmin); font-weight: 400; }
+.App-sub-header #left  { width: 25%; display: table-cell; vertical-align: middle; }
+.App-sub-header #right { width: 25%; display: table-cell; vertical-align: middle; }
+
+
 
 /* Format main app page body */
 .App-body {
     /* Confine space to the zone not taken up by the header */
     position: absolute;
-    top: 7vh;
+    top: 10vh;
     width: 100%;
     height: 93vh;
     display: flex; 

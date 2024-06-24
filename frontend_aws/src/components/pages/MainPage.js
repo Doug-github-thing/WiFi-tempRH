@@ -4,7 +4,7 @@ import { AuthContext } from '../../context/Auth.context.js';
 import API from "../../api/API.js";
 
 
-const Dashboard = ({ selectedSensor }) => {
+const MainPage = ({ isDashboard, selectedSensor }) => {
     const { state, logout } = useContext(AuthContext);
     const [data, setData] = useState(null);
     
@@ -16,10 +16,17 @@ const Dashboard = ({ selectedSensor }) => {
     }, [selectedSensor]);
 
 
-    return (<>
+    const getDashboard = () => {
+        return <>
+            <div>This is the dashboard</div>
+        </>
+    };
 
-        {/* If there's not currently selected sensor, do not attempt to load one: */}
-        {!selectedSensor ? "Select a sensor to view data..." :
+
+    const getSensorView = () => {
+        return <>
+            {/* If there's not currently selected sensor, do not attempt to load one: */}
+            {!selectedSensor ? "Select a sensor to view data..." :
         
             // If no current data, don't display. If there is current data, display it!
             !data ? "Connecting..." :
@@ -30,10 +37,21 @@ const Dashboard = ({ selectedSensor }) => {
                         </li>
                     ))}
                 </div>
+            }
+        </>;
+    };
+
+
+    return (<>
+
+        {isDashboard ?
+            getDashboard()
+                :
+            getSensorView()
         }
 
 
     </>);
 }
 
-export default Dashboard;
+export default MainPage;
