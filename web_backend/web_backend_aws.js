@@ -111,7 +111,7 @@ app.get('/node/:node/:sensor', async (req, res) => {
  * Gets all data for given sensor in a given node.
  * GET '/node/:node/:sensor'
  */
-app.get('/current/:node/:sensor', (req, res) => {
+app.get('/current/:node/:sensor', async (req, res) => {
     const connection = await getConnection();
     const node = parseInt(req.params.node);
     const sensor = parseInt(req.params.sensor);
