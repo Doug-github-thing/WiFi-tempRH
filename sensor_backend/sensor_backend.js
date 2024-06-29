@@ -102,7 +102,7 @@ app.post('/data', (req, res) => {
 
 
     
-    res.status(200).send(`Success:${getHHMMSS()}`);
+    res.status(200).send(`Success:${getTimestampSeconds()}`);
 });
 
 
