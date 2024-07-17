@@ -29,7 +29,7 @@ static void setup_i2c(void) {
  *  - Wait 10ms before getting data
  */
 static int setup_aht20(void) {
-    ESP_LOGI("i2c", "Initializing AHT20");
+    ESP_LOGI("aht20", "Initializing AHT20");
 
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -41,13 +41,12 @@ static int setup_aht20(void) {
     i2c_cmd_link_delete(cmd);
 
     if (ret != ESP_OK) {
-        ESP_LOGE("i2c", "Error initializing AHT20 sensor");
+        ESP_LOGE("aht20", "Error initializing AHT20 sensor");
         return ret;
     }
 
     // Datasheet recommends 10ms delay after queuing for status byte
     vTaskDelay(10 / portTICK_RATE_MS); 
-    ESP_LOGI("i2c", "ready to proceed");
  
     // Create "reading" to parse the status byte
     uint8_t reading = 0;
@@ -61,16 +60,16 @@ static int setup_aht20(void) {
     i2c_cmd_link_delete(cmd);
 
     if (read_result != ESP_OK) {
-        ESP_LOGW("i2c", "result of \"master_read()\" is invald.");
+        ESP_LOGW("aht20", "result of \"master_read()\" is invald.");
         return read_result;
     }
 
     if (read_result == 0x18) {
-        ESP_LOGW("i2c", "AHT20 not properly initialized;\n\tThe reading is: %d", reading);
+        ESP_LOGW("aht20", "AHT20 not properly initialized;\n\tThe reading is: %d", reading);
         return read_result;
     }
     
-    ESP_LOGI("i2c", "AHT20 initialized");
+    ESP_LOGI("aht20", "AHT20 initialized");
     return ESP_OK;
 }
 
@@ -190,7 +189,7 @@ static int write_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) 
     i2c_cmd_link_delete(cmd);
 
     if (ret != ESP_OK) {
-        ESP_LOGE("i2c", "Error writing to EEPROM module");
+        ESP_LOGE("eeprom", "Error writing to EEPROM module");
         return ret;
     }
     return ESP_OK;
@@ -220,13 +219,13 @@ static int read_aht20(char *result_buff) {
     i2c_cmd_link_delete(cmd);
 
     if (ret != ESP_OK) {
-        ESP_LOGW("i2c", "Error querying AHT20 sensor");
+        ESP_LOGW("aht20", "Error querying AHT20 sensor");
         // return ret;
     }
 
     // Datasheet recommends 80ms delay after asking for data for the sensor to take a reading
     vTaskDelay(800 / portTICK_RATE_MS); 
-    ESP_LOGI("i2c", "ready to read");
+    ESP_LOGI("aht20", "ready to read");
 
     // Reads a buffer of 7 bytes
     uint8_t data_buff[7];
@@ -241,7 +240,7 @@ static int read_aht20(char *result_buff) {
     i2c_cmd_link_delete(cmd);
 
     if (ret != ESP_OK) {
-        ESP_LOGW("i2c", "Error reading result from AHT20 sensor");
+        ESP_LOGW("aht20", "Error reading result from AHT20 sensor");
         // return ret;
     }
 
