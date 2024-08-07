@@ -72,7 +72,7 @@ app.post('/data', (req, res) => {
         const options = {
             hostname: 'monitor.dougrynar.com',
             port: 443,
-            path: `data/0`,
+            path: `/backend/data/0`,
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
