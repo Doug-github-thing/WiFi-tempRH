@@ -62,7 +62,7 @@ app.post('/data', (req, res) => {
     console.log(`parsed data. ${timestamp}, ${data.temp}, ${data.rh}`);
 
 
-    // https://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+    // https://monitor.dougrynar.com:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
         const json_data = JSON.stringify({
             sensor_id: data.id,
             timestamp: timestamp,
@@ -70,9 +70,9 @@ app.post('/data', (req, res) => {
             rh: data.rh
         });
         const options = {
-            hostname: 'temp-rh.duckdns.org',
+            hostname: 'monitor.dougrynar.com',
             port: 443,
-            path: `/backend/data/0`,
+            path: `data/0`,
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
