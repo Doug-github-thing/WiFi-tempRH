@@ -1,7 +1,7 @@
 // For handling the web requests for fetching data from the database
 class API {
 
-    static backend_url = "https://temp-rh.duckdns.org/backend";
+    static backend_url = "https://monitor.dougrynar.com/backend";
     
 
     /**
