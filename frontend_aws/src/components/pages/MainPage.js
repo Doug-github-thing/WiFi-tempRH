@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/Auth.context.js';
 import API from "../../api/API.js";
 import "./MainPage.css";
 
+import { HistoricalDataPlot } from '../HistoricalDataPlot.js';
 
 const MainPage = ({ isDashboard, selectedSensor }) => {
     const { state, logout } = useContext(AuthContext);
@@ -56,11 +57,12 @@ const MainPage = ({ isDashboard, selectedSensor }) => {
             // If no current data, don't display. If there is current data, display it!
             !data ? "Connecting..." :
                 <div className="dataWrapper">
-                    {data.map((data) => (
+                    <HistoricalDataPlot title={"History"} data={data}/>
+                    {/* {data.map((data) => (
                         <li className="ListItem" key={data.timestamp}>
                             <div>{data.temp}°F {data.rh}%RH</div>
                         </li>
-                    ))}
+                    ))} */}
                 </div>
             }
         </>;

@@ -13,7 +13,7 @@ const HeaderBar = ({ select, selectedSensor, dashboardActive, setDashboardActive
 
     const getTitleText = () => {
         if (dashboardActive)
-            return "Smarmy the smlanket with";    
+            return "Monitoring System";    
         else 
             return !selectedSensor ? "Select a sensor" : selectedSensor?.name;
     };

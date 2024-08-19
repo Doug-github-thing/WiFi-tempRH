@@ -29,10 +29,11 @@ const App = () => {
                   <HeaderBar select={setSelectedSensor}
                         selectedSensor={selectedSensor}
                         dashboardActive={dashboardActive}
-                        setDashboardActive={setDashboardActive}/>
+                        setDashboardActive={setDashboardActive}
+                        />
             </div>
             <div className="App-sub-header">
-                  <div className="title" onClick={toggleDashboardStatus}>smlarmnss (view dashboard)</div>
+                  <div className="title" onClick={toggleDashboardStatus}>view dashboard</div>
             </div>
 
             <div className="App-body">
