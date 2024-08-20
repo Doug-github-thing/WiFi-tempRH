@@ -264,11 +264,36 @@ app.get('/interval', function(req, res) {
  * Gets the current timestamp in the proper format to use as a SQL timestamp
  */
 function getTimestamp() {
-    const now = new Date();
+    const isoString = new Date().toISOString();
+
+    // Create a new Date object from the ISO string
+    const date = new Date(isoString);
+
+    // Convert to Eastern Time (US & Canada)
+    const options = {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    };
+
+    const localDateString = date.toLocaleString("en-US", options);
+
+    // Extract and format date components
+    const [month, day, year] = localDateString.split(",")[0].split("/");
+    const time = localDateString.split(",")[1].trim();
+
+    // Format the string as "YYYY-MM-DD HH:mm:ss"
+    const formattedString = `${year}-${month}-${day} ${time}`;
+
+    return formattedString;
     // Format the date as a string in the 'YYYY-MM-DD HH:mm:ss' format
     //  1.  now.toISOString() generates a string representation of the date in the ISO format: 'YYYY-MM-DDTHH:mm:ss.sssZ'.
     //  2.  .replace('T', ' ') replaces the 'T' character with a space.
     //  3.  .replace(/\.\d{3}Z$/, '') removes the milliseconds and the 'Z' character at the end.
     // return now.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');  
-   return now.toISOString(); // Do not remove time zone info, so that the database can be accurate
-}
+} 
