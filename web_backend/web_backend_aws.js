@@ -269,5 +269,6 @@ function getTimestamp() {
     //  1.  now.toISOString() generates a string representation of the date in the ISO format: 'YYYY-MM-DDTHH:mm:ss.sssZ'.
     //  2.  .replace('T', ' ') replaces the 'T' character with a space.
     //  3.  .replace(/\.\d{3}Z$/, '') removes the milliseconds and the 'Z' character at the end.
-    return now.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');  
+    // return now.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');  
+   return now.toISOString(); // Do not remove time zone info, so that the database can be accurate
 }
