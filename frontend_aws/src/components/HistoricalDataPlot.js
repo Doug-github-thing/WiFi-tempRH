@@ -47,16 +47,19 @@ export const HistoricalDataPlot = ({ data }) => {
         return [Math.floor(min) - 3, Math.ceil(max) + 3];
     }
 
-    // Converts a unix timestamp to a human readable M/D/Y HH:MM
+    // Converts a SQL (ISO 8601) timestamp to a human readable M/D/Y HH:MM
     // Called when treating data prior to displaying.
-    const convertUnixTimestampFull = (unix_timestamp) => {
-        const date = new Date(unix_timestamp * 1000);
-        const day = date.getDay();
-        const month = date.getMonth();
-        const year = date.getFullYear();
-        const hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${month}/${day}/${year} ${hours}:${minutes}`;
+    const convertTimestamp = (timestamp) => {
+        // const date = new Date(unix_timestamp * 1000);
+        const date = new Date(timestamp)
+        // date.toLocaleDateString('en-US');
+        // const day = date.getDay();
+        // const month = date.getMonth();
+        // const year = date.getFullYear();
+        // const hours = date.getHours();
+        // const minutes = String(date.getMinutes()).padStart(2, '0');
+        return date.toString().substring(4, 21);
+        // return `${month}/${day}/${year} ${hours}:${minutes}`;
     }
 
 
@@ -88,7 +91,7 @@ export const HistoricalDataPlot = ({ data }) => {
                 <ul className='ListView'>
                     {data.map((data) => (
                       <li className='ListItem' key={data.timestamp}>
-                        <div>{convertUnixTimestampFull(data.unix_timestamp)}:</div>
+                        <div>{convertTimestamp(data.timestamp)}</div>
                         <div>{data.temp}°F {data.rh}%RH</div>
                       </li>
                       )
