@@ -116,7 +116,8 @@ app.get('/current/:node', async (req, res) => {
     const node = parseInt(req.params.node);
     const my_query = 
         `SELECT * FROM node_${node}_sensors ns JOIN node_${node} n ON ns.sensor_id = n.sensor_id 
-        WHERE n.timestamp = (SELECT MAX(n1.timestamp) FROM node_${node} n1 WHERE n1.sensor_id = ns.sensor_id);`;   
+        WHERE n.timestamp = (SELECT MAX(n1.timestamp) FROM node_${node} n1 WHERE n1.sensor_id = ns.sensor_id)
+        ORDER BY ns.sensor_id ASC;`;   
     executeQuery(connection, my_query, req, res);
     connection.end();
 });
