@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#ifndef I2C_LIB_H_
+#define I2C_LIB_H_
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -29,12 +28,13 @@
 #define ACK_CHECK_DIS             0x0   /* I2C master will NOT check ack from slave */
 
 
-static void setup_i2c(void);
-static int setup_aht20(void);
-static int setup_eeprom(void);
+int setup_i2c(void);
+int setup_aht20(void);
+int setup_eeprom(void);
 
-static int read_aht20(char *);
-static void parse_aht20_data(char *, uint8_t *);
-static int read_eeprom(uint16_t, int, uint8_t*);
-static int write_eeprom(uint16_t, int, uint8_t*);
-// tail
+int read_aht20(char *);
+void parse_aht20_data(char *, uint8_t *);
+int read_eeprom(uint16_t, int, uint8_t*);
+int write_eeprom(uint16_t, int, uint8_t*);
+
+#endif

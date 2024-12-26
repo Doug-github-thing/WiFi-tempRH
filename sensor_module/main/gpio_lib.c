@@ -73,19 +73,19 @@ void setup_gpio_in(void *interrupt_fun) {
 }
 
 
-static void toggle_led(int gpio_pin) {
+void toggle_led(int gpio_pin) {
     int current = gpio_get_level(gpio_pin);
     gpio_set_level(gpio_pin, current==0 ? 1 : 0);
 }
 
 
-static void gpio_isr_handler(void *arg) {
+void gpio_isr_handler(void *arg) {
     uint32_t gpio_num = (uint32_t) arg;
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
 
-static void queue_handle(void (*function_ptr)()) {
+void queue_handle(void (*function_ptr)()) {
     uint32_t io_num;
     for (;;) 
         if (xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
@@ -94,7 +94,7 @@ static void queue_handle(void (*function_ptr)()) {
 }
 
 
-static void adc_task(void) {
+void adc_task(void) {
     uint16_t adc_data;
     bool previous_high = false;
     while (1) {
@@ -119,7 +119,7 @@ static void adc_task(void) {
 }
 
 
-static void setup_adc(void) {
+void setup_adc(void) {
     adc_config_t adc_config;
 
     // Depend on menuconfig->Component config->PHY->vdd33_const value

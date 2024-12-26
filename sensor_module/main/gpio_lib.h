@@ -1,3 +1,5 @@
+#ifndef GPIO_LIB_H_
+#define GPIO_LIB_H_
 /**
  * Hardware config for my board:
  * GPIO2: Onboard blue LED
@@ -18,11 +20,13 @@
 #define GPIO_INPUT_PIN_SEL   1ULL<<BUTTON
 
 
-static void toggle_led(int);
-static void gpio_isr_handler(void *);
-static void queue_handle(void (*)());
-static void adc_task(void);
+void toggle_led(int);
+void gpio_isr_handler(void *);
+void queue_handle(void (*)());
+void adc_task(void);
 
 void setup_gpio_in(void *);
 void setup_gpio_out(void);
-static void setup_adc(void);
+void setup_adc(void);
+
+#endif
