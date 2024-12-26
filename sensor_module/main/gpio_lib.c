@@ -64,7 +64,7 @@ void setup_gpio_in(void *interrupt_fun) {
     //create a queue to handle gpio event from isr
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     //start gpio task
-    xTaskCreate(queue_handle, "queue_handle", 2048, interrupt_fun, 10, NULL);
+    xTaskCreate((TaskFunction_t)queue_handle, "queue_handle", 2048, interrupt_fun, 10, NULL);
 
     //install gpio isr service
     gpio_install_isr_service(0);
@@ -128,5 +128,5 @@ void setup_adc(void) {
     adc_config.clk_div = 8; // ADC sample collection clock = 80MHz/clk_div = 10MHz
     ESP_ERROR_CHECK(adc_init(&adc_config));
 
-    xTaskCreate(adc_task, "adc_task", 2048, NULL, 10, NULL);
+    xTaskCreate((TaskFunction_t)adc_task, "adc_task", 2048, NULL, 10, NULL);
 }
