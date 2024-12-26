@@ -1,9 +1,10 @@
 #include "i2c_lib.h"
 
+
 /**
  * Configures I2C interface for the ESP as Master
  */
-static void setup_i2c(void) {
+int setup_i2c(void) {
     ESP_LOGI("i2c", "Initializing ESP I2C interface");
 
     int i2c_master_port = I2C_PORT_NUM;
@@ -28,7 +29,7 @@ static void setup_i2c(void) {
  *  - Send 0x71 to get byte status word. If it's 0x18, good to go.
  *  - Wait 10ms before getting data
  */
-static int setup_aht20(void) {
+int setup_aht20(void) {
     ESP_LOGI("aht20", "Initializing AHT20");
 
     int ret;
@@ -79,25 +80,27 @@ static int setup_aht20(void) {
  * Send some test bytes to the EEPROM, then read them back.
  * If the reading does not equal what was written, there's a problem.
  */
-static int setup_eeprom() {
-    ESP_LOGI("eeprom", "Initializing EEPROM");
+int setup_eeprom() {
+    ESP_LOGI("eeprom test", "Initializing EEPROM");
 
-    uint8_t write_buffer[4] = "test";
-    write_eeprom(0x0000, 4, write_buffer);
-    uint8_t read_buffer[4];
-    read_eeprom(0x0000, 4, read_buffer);
+    static uint8_t write_buffer[5] = "test";
+    static uint8_t read_buffer[5];
+    write_eeprom(0x0000, 5, write_buffer);
+    read_eeprom(0x0000, 5, read_buffer);
 
-    // Check for discrepencies
-    for (int i=0; i<4; i++) {
+    // Check for discrepencies between written and read bytes
+    for (int i=0; i<5; i++) {
         if (write_buffer[i] != read_buffer[i]) {
-            ESP_LOGE("eeprom", "Error initializing EEPROM. Failed at byte # %d", i);
-            ESP_LOGE("eeprom", "Wrote: %s", write_buffer);
-            ESP_LOGE("eeprom", "Read: %s", read_buffer);
+            ESP_LOGE("eeprom test", "Error initializing EEPROM. Failed at byte # %d", i);
+            ESP_LOGE("eeprom test", "Wrote: \"%s\"", write_buffer);
+            ESP_LOGE("eeprom test", "Read: \"%s\"", read_buffer);
             return ESP_ERR_INVALID_RESPONSE;
         }
     }
 
-    ESP_LOGI("eeprom", "EEPROM connected successfully");
+    ESP_LOGI("eeprom test", "Wrote: \"%s\"", write_buffer);
+    ESP_LOGI("eeprom test", "Read: \"%s\"", read_buffer);
+    ESP_LOGI("eeprom test", "EEPROM connected successfully");
     return ESP_OK;
 }
 
@@ -120,9 +123,9 @@ static int setup_eeprom() {
  *      8. Stop command
  * @param byte_addr 16 bit byte address in EEPROM to read
  * @param byte_cnt How many bytes to read from memory
- * @param data_buffer Byte buffer where reading of memory at that location is stored
+ * @param read_buffer Byte buffer where reading of memory at that location is stored
  */
-static int read_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) {
+int read_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* read_buffer) {
     ESP_LOGI("eeprom", "Preparing to query EEPROM at address 0x%04x for %d bytes", byte_addr, byte_cnt);
 
     uint8_t dev_select_read  = I2C_EEPROM_ADDR << 1 | I2C_READ_BIT;  // EEPROM addr + Read/Write bit
@@ -137,8 +140,8 @@ static int read_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) {
     i2c_master_start(cmd);                                               // 5. I2C start command
     i2c_master_write_byte(cmd, dev_select_read, ACK_CHECK_EN);           // 6. Send I2C address + read
     for (int i=0; i<byte_cnt-1; i++)        // Loop through all but the last byte
-        i2c_master_read_byte(cmd, &data_buffer[i], ACK_CHECK_DIS);       // 7. Read data into read buffer
-    i2c_master_read_byte(cmd, &data_buffer[byte_cnt-1], ACK_CHECK_EN);   // 7. Read last byte into buffer
+        i2c_master_read_byte(cmd, &read_buffer[i], ACK_CHECK_DIS);       // 7. Read data into read buffer
+    i2c_master_read_byte(cmd, &read_buffer[byte_cnt-1], ACK_CHECK_EN);   // 7. Read last byte into buffer
     i2c_master_stop(cmd);                                                // 8. Stop command
     ret = i2c_master_cmd_begin(I2C_PORT_NUM, cmd, 1000 / portTICK_RATE_MS); // Send i2c queue
     i2c_cmd_link_delete(cmd);
@@ -161,8 +164,8 @@ static int read_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) {
  * @param byte_cnt How many bytes to write to memory
  * @param data_buffer Byte buffer containing data to be stored
  */
-static int write_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) {
-    ESP_LOGI("eeprom", "Writing to EEPROM at address 0x%04x", byte_addr);
+int write_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) {
+    ESP_LOGI("eeprom", "Writing data \"%s\" to EEPROM at address 0x%04x", data_buffer, byte_addr);
 
     // Check if the data will fit on the page.
     // Find the position in the row by taking the rightmost 5 bits.
@@ -206,7 +209,7 @@ static int write_eeprom(uint16_t byte_addr, int byte_cnt, uint8_t* data_buffer) 
  * Returns the result in a char buffer 
  * of the form <"temp":69.2,"rh":42.0> for easy jsonification
  */
-static int read_aht20(char *result_buff) {
+int read_aht20(char *result_buff) {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
@@ -278,7 +281,7 @@ static int read_aht20(char *result_buff) {
  * Returns the result in a char buffer 
  * of the form <"temp":69.2,"rh":42.0> for easy jsonification
  */
-static void parse_aht20_data(char *result_buff, uint8_t *data_buff) {
+void parse_aht20_data(char *result_buff, uint8_t *data_buff) {
 
     // Parse temperature
     uint32_t temp_signal = 0;
@@ -311,7 +314,7 @@ static void parse_aht20_data(char *result_buff, uint8_t *data_buff) {
  *  1. Addr byte: (Device Address << 1 | I2C_WRITE_BIT)
  *  2. Control byte: 
  */
-static int setup_oled() {
+int setup_oled() {
     ESP_LOGI("oled", "Initializing OLED screen");
 
     int ret;
