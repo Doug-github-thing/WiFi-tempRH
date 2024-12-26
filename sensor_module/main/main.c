@@ -13,7 +13,7 @@
 #include "nvs_flash.h"
 #include "driver/i2c.h"
 
-// #include "wifi_lib.c"
+#include "wifi_lib.c"
 // #include "http_lib.c"
 #include "gpio_lib.h"
 #include "i2c_lib.h"
@@ -25,7 +25,7 @@
 #define PORT           55555          /* Port where sensor backend listens */
 
 
-// uint32_t current_timestamp;           /* Holds the current time in seconds since 01Jan2024 */
+uint32_t current_timestamp;           /* Holds the current time in seconds since 01Jan2024 */
 
 
 void read_data_and_send(void) {
@@ -42,8 +42,8 @@ void app_main()
 
     ESP_LOGI("main", "ESP booted. Starting peripherals");
 
-    // tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
-    // setup_wifi_config(&my_wifi_info);     // Connect to the access point
+    tcpip_adapter_ip_info_t my_wifi_info; // Holds wifi info after config
+    setup_wifi_config(&my_wifi_info);     // Connect to the access point
 
     setup_i2c();                       // Setup I2C pins on ESP
     setup_aht20();                     // Setup AHT20 for data reading
@@ -60,7 +60,7 @@ void app_main()
 
     // Initialize timestamp tracking for data logging
     // setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
-    // setup_timer(&current_timestamp); // Use timer to keep timestamp up to date, show alive LED
+    setup_timer(&current_timestamp); // Use timer to keep timestamp up to date, show alive LED
 
 
     ESP_LOGI("main", "Finished initializiation!");

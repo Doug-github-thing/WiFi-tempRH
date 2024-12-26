@@ -1,42 +1,16 @@
-/* WiFi station Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "esp_system.h"
-#include "lwip/err.h"
-#include "lwip/sys.h"
-#include "esp_log.h"
-#include "esp_netif.h"
-#include "esp_event.h"
-#include "esp_wifi.h"
-#include "nvs.h"
-#include "nvs_flash.h"
-
-/* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t s_wifi_event_group;
-
-/* The event group allows multiple bits for each event, but we only care about two events:
- * - we are connected to the AP with an IP
- * - we failed to connect after the maximum amount of retries */
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT      BIT1
-
-/* WiFi credentials are set up via the project configuration menu */
-static const char *WIFI_TAG = "wifi";
+/* 
+ * This library is based on the WiFi station example from the FreeRTOS sdk for ESP8266.
+ */
+#include "wifi_lib.h"
 
 static int s_retry_num = 0;
 
-static void event_handler(tcpip_adapter_ip_info_t* adapter_info, esp_event_base_t event_base,
+static void event_handler(void* adapter_info_arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
 {
+    // Cast incoming parameters to event as the appropriate data type
+    tcpip_adapter_ip_info_t* adapter_info = (tcpip_adapter_ip_info_t*) adapter_info_arg;
+
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
