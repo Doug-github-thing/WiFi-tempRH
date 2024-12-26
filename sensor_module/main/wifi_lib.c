@@ -3,6 +3,9 @@
  */
 #include "wifi_lib.h"
 
+static const char *WIFI_TAG = "wifi";
+
+
 static int s_retry_num = 0;
 
 static void event_handler(void* adapter_info_arg, esp_event_base_t event_base,

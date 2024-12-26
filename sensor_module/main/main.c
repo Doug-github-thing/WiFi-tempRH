@@ -13,11 +13,11 @@
 #include "nvs_flash.h"
 #include "driver/i2c.h"
 
-#include "wifi_lib.c"
-// #include "http_lib.c"
+#include "wifi_lib.h"
+#include "http_lib.h"
 #include "gpio_lib.h"
 #include "i2c_lib.h"
-#include "timer_lib.c"
+#include "timer_lib.h"
 
 
 #define SENSOR_ID      6              /* Unique identifier of which module this is */
@@ -30,8 +30,8 @@ uint32_t current_timestamp;           /* Holds the current time in seconds since
 
 void read_data_and_send(void) {
     char reading_str_buffer[23];
-    read_aht20(reading_str_buffer);   // Read data from the AHT20, store in buffer
-    // http_send(SENSOR_ID, HOSTNAME, PORT, reading_str_buffer);
+    read_aht20(reading_str_buffer);   // Read data from the AHT20, store in 23 byte buffer
+    http_send(SENSOR_ID, HOSTNAME, PORT, reading_str_buffer);
     ESP_LOGW("dummy numbers", "I generated these numbers: %s", reading_str_buffer);
 }
 
@@ -59,33 +59,28 @@ void app_main()
 
 
     // Initialize timestamp tracking for data logging
-    // setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
+    setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
     setup_timer(&current_timestamp); // Use timer to keep timestamp up to date, show alive LED
 
 
     ESP_LOGI("main", "Finished initializiation!");
 
-    // Blink every second to show it's alive
+
+    bool already_done_this_minute = false;
     while(1) {
-        toggle_led(ONBOARD_BLUE);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // If it's within 10 seconds of a 30 minute interval
+        // AND it hasn't taken a reading yet
+        if (!already_done_this_minute && current_timestamp % 900 <= 10) {
+            ESP_LOGI("loop", "The time is %u", current_timestamp+1704085200);
+            read_data_and_send();
+            already_done_this_minute = true;
+        }
+        // If no longer within 30 seconds of a 30 minute interval, clear the "done" flag
+        else if (current_timestamp % 900 > 10) 
+            already_done_this_minute = false;
+
+        // Wait 1 second
+        vTaskDelay(1000 / portTICK_RATE_MS);
     }
-
-    // bool already_done_this_minute = false;
-    // while(1) {
-
-    //     // If it's within 10 seconds of a 30 minute interval
-    //     // AND it hasn't taken a reading yet
-    //     if (!already_done_this_minute && current_timestamp % 900 <= 10) {
-    //         ESP_LOGI("loop", "The time is %u", current_timestamp+1704085200);
-    //         read_data_and_send();
-    //         already_done_this_minute = true;
-    //     }
-    //     // If no longer within 30 seconds of a 30 minute interval, clear the "done" flag
-    //     else if (current_timestamp % 900 > 10) 
-    //         already_done_this_minute = false;
-
-    //     // Wait 1 second
-    //     vTaskDelay(1000 / portTICK_RATE_MS);
-    // }
 }

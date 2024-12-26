@@ -1,18 +1,6 @@
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_log.h"
-#include "esp_netif.h"
-#include "esp_event.h"
-#include "nvs.h"
-#include "nvs_flash.h"
-
-#include <netdb.h>
-#include <sys/socket.h>
+#include "http_lib.h"
 
 static const char *HTTP_TAG = "http";
-
 
 /**
  * Sets the value of the global "current_timestamp" variable.
@@ -24,7 +12,7 @@ static const char *HTTP_TAG = "http";
  * @param port int port of node backend
  * @returns -1 on failure, 0 on success
  */
-static int setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *hostname, int port) {
+int setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *hostname, int port) {
     // Format request
     char request[300];
     snprintf(request, 300,
@@ -39,7 +27,6 @@ static int setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *hos
         .ai_socktype = SOCK_STREAM,
     };
     struct addrinfo *res;
-    struct in_addr *addr;
 
     char port_str[6];
     snprintf(port_str, 6, "%d", port);
@@ -51,9 +38,6 @@ static int setup_timestamp(uint32_t *current_timestamp, int sensor_id, char *hos
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         return -1;
     }
-
-    addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
-    // ESP_LOGI("timestamp", "DNS lookup succeeded. IP=%s:", inet_ntoa(*addr));
 
     // Allocate socket
     int s = socket(res->ai_family, res->ai_socktype, 0);
@@ -145,7 +129,7 @@ static void format_JSON_POST(char *request, int sensor_id, char *hostname, char*
  * @param payload String Data to send, as key value pairs. ie `"temp":69.1,"rh":42.0`
  * @returns -1 on failure, 0 on success
  */
-static int http_send(int sensor_id, char *hostname, int port, char* payload) {
+int http_send(int sensor_id, char *hostname, int port, char* payload) {
     // Format request
     char request[300];
     format_JSON_POST(request, sensor_id, hostname, payload);
