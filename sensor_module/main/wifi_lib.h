@@ -20,7 +20,7 @@
 #include "nvs_flash.h"
 
 /* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t s_wifi_event_group;
+EventGroupHandle_t s_wifi_event_group;
 
 
 /* The event group allows multiple bits for each event, but we only care about two events:
