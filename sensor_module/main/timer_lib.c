@@ -1,14 +1,4 @@
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "driver/hw_timer.h"
-#include "driver/gpio.h"
-
-struct timer_callback_args { /* For passing params to the timer callback handler */
-    uint32_t *current_timestamp_ptr;
-    int gpio_indicator;
-};
+#include "timer_lib.h"
 
 
 int timer_counter = 0; /* Tracks how many times the hw timer interrupt has occured */
@@ -35,7 +25,6 @@ void timer_callback(void *args) {
  */
 void setup_timer(uint32_t *current_timestamp_ptr)
 {
-    int led_pin = 2;
     ESP_LOGI("timer", "Initializing timer to increment current timestamp");
     hw_timer_init(timer_callback, current_timestamp_ptr);
     hw_timer_alarm_us(1000000, true); // 1 second

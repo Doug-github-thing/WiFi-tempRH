@@ -17,7 +17,7 @@
 // #include "http_lib.c"
 #include "gpio_lib.h"
 #include "i2c_lib.h"
-// #include "timer_lib.c"
+#include "timer_lib.c"
 
 
 #define SENSOR_ID      6              /* Unique identifier of which module this is */
