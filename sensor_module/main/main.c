@@ -19,9 +19,17 @@
 #include "i2c_lib.c"
 #include "timer_lib.c"
 
+// +-----------+-------------+
+// | sensor_id | name        |
+// +-----------+-------------+
+// |         1 | Living Room |
+// |         2 | Bed Room    |
+// |         3 | Game Room   |
+// |         4 | Porch       |
+// +-----------+-------------+
 
-#define SENSOR_ID      1              /* Unique identifier of which module this is */
-#define HOSTNAME       "192.168.0.56" /* Hostname address of local sensor backend */
+#define SENSOR_ID      4              /* Unique identifier of which module this is */
+#define HOSTNAME       "192.168.0.76" /* Hostname address of local sensor backend */
 #define PORT           55555          /* Port where sensor backend listens */
 
 
@@ -56,13 +64,14 @@ void app_main()
     setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button
     setup_adc();                       // Setup ADC
 
+    // setup_oled();                      // Setup OLED screen
+
     // Initialize timestamp tracking for data logging
     setup_timestamp(&current_timestamp, SENSOR_ID, HOSTNAME, PORT); 
     setup_timer(&current_timestamp); // Use timer to keep timestamp up to date, show alive LED
 
 
     ESP_LOGI("main", "Finished initializiation!");
-
 
     bool already_done_this_minute = false;
     while(1) {

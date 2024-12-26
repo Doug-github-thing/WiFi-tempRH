@@ -302,3 +302,49 @@ static void parse_aht20_data(char *result_buff, uint8_t *data_buff) {
     snprintf(result_buff, 23, "\"temp\":%3.1f,\"rh\":%3.1f", temp_float, rh_float);
     return;
 }
+
+
+/**
+ * Initialize the SSD1306 OLED screen.
+ * Send some test bytes to the screen, then read them back.
+ * Dataflow:
+ *  1. Addr byte: (Device Address << 1 | I2C_WRITE_BIT)
+ *  2. Control byte: 
+ */
+static int setup_oled() {
+    ESP_LOGI("oled", "Initializing OLED screen");
+
+    int ret;
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, I2C_OLED_ADDR << 1 | I2C_WRITE_BIT, ACK_CHECK_EN); // Send I2C address
+    i2c_master_write_byte(cmd, 0b10000000, ACK_CHECK_EN); // Send control byte set to Command
+    i2c_master_write_byte(cmd, 0b10100100, ACK_CHECK_EN); // Command: Turn screen on
+    i2c_master_write_byte(cmd, 0b01000000, ACK_CHECK_EN); // Send control byte set to Data
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Data: 0xAA
+    
+    // for(int i=0; i<127; i++)
+        // i2c_master_write_byte(cmd, 0xAA, ACK_CHECK_EN); // Send data byte
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(I2C_PORT_NUM, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+
+    if (ret != ESP_OK) {
+        ESP_LOGW("oled", "Error communicating with OLED screen");
+        return ret;
+    }
+
+    ESP_LOGI("oled", "OLED screen initialized successfully");
+    return ESP_OK;
+}

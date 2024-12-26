@@ -18,6 +18,8 @@
 #define I2C_SCL_PIN               5     /* GPIO pin on ESP used for SCL */
 #define I2C_AHT20_ADDR            0x38  /* I2C Address of AHT20 temp/rh sensor*/
 #define I2C_EEPROM_ADDR           0x50  /* I2C Address of M24C64 EEPROM module */
+#define I2C_OLED_ADDR             0x3C  /* I2C Address of M24C64 EEPROM module */
+
 
 // General definitions
 #define I2C_PORT_NUM              I2C_NUM_0

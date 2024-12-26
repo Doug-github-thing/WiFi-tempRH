@@ -51,14 +51,20 @@ export const HistoricalDataPlot = ({ data }) => {
     // Called when treating data prior to displaying.
     const convertTimestamp = (timestamp) => {
         // const date = new Date(unix_timestamp * 1000);
+        console.log(`fuck yourself. Given timestamp is ${timestamp}`);
         const date = new Date(timestamp)
+        console.log(`Converted to a date, I get: ${date}`);
+        const mystr = date.toLocaleString(
+            [], {month: 'numeric', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'})
+        console.log(`Converted to a str, I get: ${mystr}`);
         // date.toLocaleDateString('en-US');
         // const day = date.getDay();
         // const month = date.getMonth();
         // const year = date.getFullYear();
         // const hours = date.getHours();
         // const minutes = String(date.getMinutes()).padStart(2, '0');
-        return date.toString().substring(4, 21);
+        return mystr;
+        
         // return `${month}/${day}/${year} ${hours}:${minutes}`;
     }
 
