@@ -1,13 +1,57 @@
+/* Set default rules for the whole app */
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    align-items: center;
+    text-align: center;
+    color: #BADBED;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Format header
+    Tabular band with 3 elements: left, title, right.
+    Sized to keep the title in the center */
+.App-header {
+    height: 7vh; width: 100%; display: table;
+    background-color: #282c34; }
+.App-header #title {
+    width: 50%; display: table-cell; vertical-align: middle;
+    font-size: calc(5.5vmin); font-weight: 800; }
+.App-header #left  { width: 25%; display: table-cell; vertical-align: middle; }
+.App-header #right { width: 25%; display: table-cell; vertical-align: middle; }
+.App-sub-header {
+    height: 3vh; width: 100%; display: table;
+    background-color: #171a1e; }
+.App-sub-header #title {
+    width: 50%; display: table-cell; vertical-align: middle;
+    font-size: calc(5.5vmin); font-weight: 400; }
+.App-sub-header #left  { width: 25%; display: table-cell; vertical-align: middle; }
+.App-sub-header #right { width: 25%; display: table-cell; vertical-align: middle; }
+
+
+
+/* Format main app page body */
+.App-body {
+    /* Confine space to the zone not taken up by the header */
+    position: absolute;
+    top: 10vh;
+    width: 100%;
+    height: 90vh;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    background-color: #3c414c;
+    font-size: calc(10px + 2vmin);
+    overflow-y:auto;
+}
+
+/* Remove the pesky bullet point from list items */
+li {list-style-type: none;}
+
+/* Format links */
+a {
+    color: #05ffee;
 }
