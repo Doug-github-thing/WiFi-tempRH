@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Set up proper dependencies
 COPY package.json package-lock.json ./
+RUN npm install react-scripts
 RUN npm install -g npm@11.0.0
 
 # Pass the backend URL from environment into the app
