@@ -10,9 +10,9 @@ const fs = require('fs');
 const port = 4001;
 
 ///////////////////////////////////////////////////////////////////////////////////
-// For allowing the frontend through CORS for during development
-// const cors = require('cors');
-// app.use(cors({ origin: 'http://localhost:4000' }));
+// For allowing communication to the dedicated frontend location
+const cors = require('cors');
+app.use(cors({ origin: 'http://localhost:4000' }));
 ///////////////////////////////////////////////////////////////////////////////////
 
 
