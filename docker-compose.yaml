@@ -1,0 +1,98 @@
+# version: '3.9'
+
+# services:
+#   monitor-backend:
+#     build:
+#       context: .
+#     container_name: monitor-backend
+#     restart: always
+#     ports:
+#       - "4001:3000"
+#     depends_on:
+#       - monitor-db
+#     networks:
+#       - monitor-network
+#     environment:
+#       DB_HOST: monitor-db
+#       DB_PORT: 3306
+#       DB_NAME: monitorDB
+#       DB_USER: monitor
+#       DB_PASSWORD: examplepassword
+
+#   monitor-db:
+#     image: mariadb:lts
+#     container_name: monitor-db
+#     restart: always
+#     ports:
+#       - "3306:3306"
+#     networks:
+#       - monitor-network
+#     volumes:
+#       - db_data:/var/lib/mysql
+#       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+#     environment:
+#       MARIADB_DATABASE: monitorDB
+#       MARIADB_USER: monitor
+#       MARIADB_PASSWORD: examplepassword
+#       MARIADB_ROOT_PASSWORD: rootpassword
+
+# networks:
+#   monitor-network:
+
+# volumes:
+#   db_data:
+
+version: '3.9'
+
+services:
+  monitor-backend:
+    build:
+      context: ./web_backend
+    container_name: monitor-backend
+    restart: always
+    ports:
+      - "4001:3000"
+    depends_on:
+      - monitor-db
+    networks:
+      - monitor-network
+    environment:
+      DB_HOST: monitor-db
+      DB_PORT: 3306
+      DB_NAME: monitorDB
+      DB_USER: monitor
+      DB_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+
+  monitor-db:
+    image: mariadb:lts
+    container_name: monitor-db
+    restart: always
+    ports:
+      - "3306:3306"
+    networks:
+      - monitor-network
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      MARIADB_DATABASE: monitorDB
+      MARIADB_USER: monitor
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_password
+      - db_root_password
+
+networks:
+  monitor-network:
+
+volumes:
+  db_data:
+
+secrets:
+  db_password:
+    file: ./db_password.txt
+  db_root_password:
+    file: ./db_root_password.txt

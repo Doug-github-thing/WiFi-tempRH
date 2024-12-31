@@ -10,3 +10,6 @@ sensor_module/config.h
 */node_modules/
 sensor_module/build
 frontend/build
+
+db_password.txt
+db_root_password.txt
