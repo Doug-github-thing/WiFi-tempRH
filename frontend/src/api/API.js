@@ -1,8 +1,7 @@
 // For handling the web requests for fetching data from the database
 class API {
 
-    static backend_url = "https://monitor.dougrynar.com/backend";
-    
+    static backend_url = process.env.REACT_APP_BACKEND_URL;
 
     /**
      * Perform a GET request to the backend for the sensors within a given node
@@ -10,6 +9,7 @@ class API {
      * @returns Promise of a list of json objects
      */
     static async getSensors(node) {
+        console.log("Trying to get from url: " + this.backend_url);
         return await fetch(`${this.backend_url}/node/${node}`)
             .then(response => response.json())
             .catch(error => console.error(error));

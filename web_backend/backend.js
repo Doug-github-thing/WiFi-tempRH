@@ -7,7 +7,7 @@ const body_parser = require('body-parser');
 app.use(body_parser.json());
 const fs = require('fs');
 
-const port = 3000;
+const port = 4001;
 
 ///////////////////////////////////////////////////////////////////////////////////
 // For allowing the frontend through CORS for during development
