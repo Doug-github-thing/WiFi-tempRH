@@ -5,6 +5,7 @@ services:
     build:
       context: ./web_backend
     container_name: monitor-backend
+    image: gaflivinburger/monitor:backend
     restart: always
     ports:
       - "4001:4001"
@@ -43,6 +44,7 @@ services:
 
   monitor-frontend:
     container_name: monitor-frontend
+    image: gaflivinburger/monitor:frontend
     build:
       context: ./frontend
       args:
