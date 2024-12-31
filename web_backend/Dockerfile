@@ -15,7 +15,7 @@ COPY backend.js ./
 COPY index.html ./
 
 # Expose the port the server listens on
-EXPOSE 3000
+EXPOSE 4001
 
 
 # Start the server
