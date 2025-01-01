@@ -9,6 +9,8 @@ COPY package*.json ./
 COPY sensor_backend.js ./
 COPY index.html ./
 
+RUN npm install
+
 # Expose the port the server listens on
 EXPOSE 55555
 
