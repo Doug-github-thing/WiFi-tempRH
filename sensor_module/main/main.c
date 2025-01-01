@@ -19,10 +19,11 @@
 #include "i2c_lib.h"
 #include "timer_lib.h"
 
+#include "../sensorconfig.h"
 
-#define SENSOR_ID   SENSOR_ID              /* Unique identifier of which module this is */
-#define HOSTNAME    SENSOR_BACKEND_ADDRESS /* Hostname address of local sensor backend */
-#define PORT        SENSOR_PORT            /* Port where sensor backend listens */
+#define SENSOR_ID   CONFIG_SENSOR_ID              /* Unique identifier of which module this is */
+#define HOSTNAME    CONFIG_SENSOR_BACKEND_ADDRESS /* Hostname address of local sensor backend */
+#define PORT        CONFIG_SENSOR_BACKEND_PORT    /* Port where sensor backend listens */
 
 
 uint32_t current_timestamp;         /* Holds the current time in seconds since 01Jan2024 */
