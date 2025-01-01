@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS node_0_sensors (
     sensor_id INT PRIMARY KEY,
     name VARCHAR(50)
 );
-INSERT INTO node_0_sensors (sensor_id, name) VALUES (1, 'Living Room');
+INSERT INTO node_0_sensors (sensor_id, name) VALUES (1, 'Game Room');
+INSERT INTO node_0_sensors (sensor_id, name) VALUES (2, 'Living Room');
+INSERT INTO node_0_sensors (sensor_id, name) VALUES (3, 'Bed Room');
+INSERT INTO node_0_sensors (sensor_id, name) VALUES (4, 'Porch');
 
 CREATE USER 'monitor'@'%' IDENTIFIED BY 'monitor';
 GRANT ALL PRIVILEGES ON monitorDB.* TO 'monitor'@'%';
