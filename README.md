@@ -134,15 +134,15 @@ Sensor:
 
 Backend:
 
-- Build new schema for RDS. Rewrite backend routes from PostgreSQL to MySQL.
+- Rewrite all backend routes from PostgreSQL to MySQL. Still need some routes for get 1 day's readings, get 1 week's readings, get readings for a custom time range.
 
-- It is currently hard coded to offer up data from the sensor ID 1. Needs to be updated to return values corresponding to any given sensor ID. (/current/node:sensor route)
+- Add oauth. Create a temporary datastore to store valid session tokens, which map to specific user IDs. Require valid session tokens for any backend route.
 
 Frontend:
 
-- needs the function to select a time interval of data to display on the graph.
+- needs to implement oauth to manage user accounts.
 
-- needs the function to select which sensor ID to view, from a list of all valid sensor IDs.
+- needs the function to select a time interval of data to display on the graph.
 
 ## Current Backend Routes
 
@@ -161,5 +161,5 @@ Frontend:
 - `/data/:node` - Adds a new data point in the indicated node. Values of `sensor_id`, `temp`, `rh` are passed as json args in the request body.
 
     ```bash
-    curl -X POST http://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+    curl -X POST https://monitor.dougrynar.com/backend/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
     ```
