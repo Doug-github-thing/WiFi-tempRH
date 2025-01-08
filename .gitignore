@@ -4,7 +4,9 @@ curl_test.sh
 
 # Security / sensitive info
 *.env
-sensor_module/config.h
+sensor_module/sensorconfig.h
+sensor_module/sdkconfig
+sensor_module/sdkconfig.old
 
 # Generated files, unecessary bloat
 */node_modules/
