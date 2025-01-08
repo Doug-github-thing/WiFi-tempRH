@@ -1,38 +1,39 @@
 # WiFi-tempRH
 A system to allow a user to access historical temperature / humidity data of any area equipped with an ESP8266 sensor module. The data will be accessed via a cloud hosted web frontend, which accesses historical data backed up on a cloud hosted database. This allows a user to check in on the status of their monitored zones from anywhere in the world.
 
-App is up at [https://temprh.vercel.app/](https://temprh.vercel.app/)
+First generation of this app is up at [https://temprh.vercel.app/](https://temprh.vercel.app/)
+
+Current version is live at [https://monitor.dougrynar.com](https://monitor.dougrynar.com)
 
 ## Data flow
-1. Temp/RH data is acquired from a sensor connected to an ESP8266 module.
+1. Temperature and humidity data is acquired from a sensor connected to an ESP8266 on a dedicated board.
 
-TODO: Update this for new Node-based architecture, and new central AWS EC2 hosted backend.
+1. The ESP8266 sends its data via an HTTP POST request to a locally (sensor_backend) hosted ExpressJS server which is running on a Raspberry Pi (or equivalent) connected to the same WiFi network.
 
+1. The Raspberry Pi hosted local server formats the data and forwards it onto the global backend.
 
-<!-- 
-1. The ESP8266 sends its data via an HTTP POST request to a locally (sensor_backend) hosted ExpressJS server which is running on a Raspberry Pi connected to the same WiFi network, using the Pi's local ip address.
+1. A dedicated server will simultaneously run an ExpressJS backend server and an attached MariaDB SQL database. This serves as the global backend, and allows data to be written to the database as it comes in from the sensor_backend.
 
-1. The Raspberry Pi hosted "node" server formats the data and forwards it onto the global backend, which hands .  
+1. This dedicated server also hosts the frontend, which uses Rest requests to the global backend to query for data.
 
-1. A separate cloud hosted ExpressJS server (hosted in an AWS EC2 instance) will simultaneously connect to this RDS database, and act as the middleman connecting the web frontend to the data store.
-
-1. The final web frontend will make ReSTful requests to the web backend for data to display. -->
+1. The final web frontend will make ReSTful requests to the web backend for data to display.
 
 This architecture leaves room for future expansion by adding an arbitrarily large number of sensor boards, and simply adding a new SQL table for each unique board ID.
 
 Data acquisition:
 
-- `Data acquired by the sensor board -> Pushed to sensor_backend server - > Sent to MySQL server`
+- `Data acquired by the sensor board -> Pushed to sensor_backend server - > Pushed to web_backend -> Sent to SQL database`
 
 Data retrieval:
 
-- `MySQL server stores data -> Pulled from web_backend -> Pulled from web_frontend -> Displayed on screen`
+- `SQL database stores data -> Pulled from web_backend -> Pulled from web_frontend -> Displayed on screen`
 
 ## Database Structure
 
 Tables:
 
 1. users (id PRIMARY KEY, name, nodes )
+    
     ```sql
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -41,6 +42,7 @@ Tables:
         node INT
     );
     ```
+
     ```sql
     INSERT INTO users (user_id, name, node) values (0, 'Dog', 0);
     ```
@@ -75,7 +77,21 @@ Tables:
     - sensor_id tracks which sensor module the data came from. Used when pulling data from specific sensors.
     - timestamp, temp, rh do what they say
 
+
 ## Updates
+
+### 1/8/25
+- Containerized each individual process for consistent deployments:
+    1. Frontend
+    1. Web Backend and MariaDB database
+    1. Sensor Backend
+- Sensor board schematic / layout updated:
+    1. Fixed wiring polarity of SCL and SDA pins on the AHT20 so it can finally read real data
+    1. Moved AHT20 farther away from the rest of the board components to minimize thermal interference
+    1. Added additional 5V voltage regulator and barrel jack to allow the board to be powered by cheap and readily available power supply transformers. **NOTE, if using this powering method, voltage regulator may dissipate enough heat to make the temperature readings unreliable. Additional temperature calibration may be necessary to offset the heat dissipation of this regulator**
+    1. Replaced pre-assembled SMT resistor for ADC pull-down circuit with an empty THT resistor slot, so a custom pull-down resistance can be chosen based on future applications.
+    1. Enlarged "future expansion" pins for breadboard compatibility
+- Servers moved from Amazon EC2 instance to locally hosted computer
 
 ### 6/9/24
 - Custom ESP8266 sensor board is set up to read data from peripherals, written with Expressif ESP8266 SDK toolchain:
@@ -118,15 +134,15 @@ Sensor:
 
 Backend:
 
-- Build new schema for RDS. Rewrite backend routes from PostgreSQL to MySQL.
+- Rewrite all backend routes from PostgreSQL to MySQL. Still need some routes for get 1 day's readings, get 1 week's readings, get readings for a custom time range.
 
-- It is currently hard coded to offer up data from the sensor ID 1. Needs to be updated to return values corresponding to any given sensor ID. (/current/node:sensor route)
+- Add oauth. Create a temporary datastore to store valid session tokens, which map to specific user IDs. Require valid session tokens for any backend route.
 
 Frontend:
 
-- needs the function to select a time interval of data to display on the graph.
+- needs to implement oauth to manage user accounts.
 
-- needs the function to select which sensor ID to view, from a list of all valid sensor IDs.
+- needs the function to select a time interval of data to display on the graph.
 
 ## Current Backend Routes
 
@@ -145,5 +161,5 @@ Frontend:
 - `/data/:node` - Adds a new data point in the indicated node. Values of `sensor_id`, `temp`, `rh` are passed as json args in the request body.
 
     ```bash
-    curl -X POST http://temprh-backend.duckdns.org:3333/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
+    curl -X POST https://monitor.dougrynar.com/backend/data/0 --header "Content-Type: application/json" --data '{"sensor_id":0,"temp":12.3,"rh":45.6}'
     ```

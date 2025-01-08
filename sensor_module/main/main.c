@@ -19,20 +19,20 @@
 #include "i2c_lib.h"
 #include "timer_lib.h"
 
+#include "../sensorconfig.h"
 
-#define SENSOR_ID      6              /* Unique identifier of which module this is */
-#define HOSTNAME       "192.168.0.76" /* Hostname address of local sensor backend */
-#define PORT           55555          /* Port where sensor backend listens */
+#define SENSOR_ID   CONFIG_SENSOR_ID              /* Unique identifier of which module this is */
+#define HOSTNAME    CONFIG_SENSOR_BACKEND_ADDRESS /* Hostname address of local sensor backend */
+#define PORT        CONFIG_SENSOR_BACKEND_PORT    /* Port where sensor backend listens */
 
 
-uint32_t current_timestamp;           /* Holds the current time in seconds since 01Jan2024 */
+uint32_t current_timestamp;         /* Holds the current time in seconds since 01Jan2024 */
 
 
 void read_data_and_send(void) {
     char reading_str_buffer[23];
     read_aht20(reading_str_buffer);   // Read data from the AHT20, store in 23 byte buffer
     http_send(SENSOR_ID, HOSTNAME, PORT, reading_str_buffer);
-    ESP_LOGW("dummy numbers", "I generated these numbers: %s", reading_str_buffer);
 }
 
 
@@ -50,8 +50,8 @@ void app_main()
     setup_eeprom();                    // Test connection to eeprom module
     // setup_oled();                      // Setup OLED screen
 
-    // char reading_str_buffer[22];
-    // read_aht20(reading_str_buffer);    // Read data from the AHT20, store in buffer
+    char reading_str_buffer[22];
+    read_aht20(reading_str_buffer);    // Read data from the AHT20, store in buffer
 
     setup_gpio_out();                  // Setup LED output pins
     setup_gpio_in(read_data_and_send); // Setup interrupt on BIP button

@@ -1,31 +1,33 @@
-require('dotenv').config();
+// require('dotenv').config();
 const express = require('express');
 const app = express();
 const mysql = require('mysql2/promise');
 // app.use(express.json());
 const body_parser = require('body-parser');
 app.use(body_parser.json());
+const fs = require('fs');
 
-const port = 3333;
+const port = 4001;
 
 ///////////////////////////////////////////////////////////////////////////////////
-// For allowing the frontend through CORS for during development
+// For allowing communication to the dedicated frontend location
 const cors = require('cors');
 app.use(cors());
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 
 // Connect to database
 const getConnection = async () => {
+    const dbPassword = fs.readFileSync(process.env.DB_PASSWORD_FILE, 'utf8').trim();
     return await mysql.createConnection({
-        user: process.env.DB_USER,
-        password: process.env.DB_PWD,
-        host: process.env.DB_ENDPOINT,
+        host: process.env.DB_HOST,
         port: process.env.DB_PORT,
-        database: process.env.DB_NAME
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: dbPassword
     });
 }
+
 /**
  * Executes a defined query on a given connection, and sends response.
  */
@@ -61,13 +63,12 @@ const executeQueryPlaceholders = async (connection, query, placeholders, req, re
 
 // Initializes webserver app, and tells stdout
 app.listen(port, async () => {
-
     // Create a connection, then close it again. 
     // Verifies connection is possible.
     const connection = await getConnection();
     connection.end();
 
-    console.log(`Server is listening on port ${port}`);
+    console.log(`Monitor project's Web Backend server is listening.`);
 });
 
 
@@ -96,7 +97,7 @@ app.get('/node/:node', async (req, res) => {
 /** 
  * Gets all data for given sensor in a given node.
  * GET '/node/:node/:sensor'
-*/
+ */
 app.get('/node/:node/:sensor', async (req, res) => {
     const connection = await getConnection();
     const node = parseInt(req.params.node);
@@ -107,8 +108,7 @@ app.get('/node/:node/:sensor', async (req, res) => {
 });
 
 /** 
- * Gets the most recent datapoint for a specified sensor module.
- * Gets all data for given sensor in a given node.
+ * TODO: Make this work to get the most recent data point for all sensor modules in a given node.
  * GET '/node/:node'
  */
 app.get('/current/:node', async (req, res) => {
