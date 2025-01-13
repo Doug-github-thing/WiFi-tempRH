@@ -2,10 +2,14 @@
 const express = require('express');
 const app = express();
 const mysql = require('mysql2/promise');
-// app.use(express.json());
 const body_parser = require('body-parser');
+// For parsing JSON and URL-encoded data
 app.use(body_parser.json());
+app.use(body_parser.urlencoded({ extended: true }));
 const fs = require('fs');
+// For google oauth2 GoogleIDToken verification 
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client();
 
 const port = 4001;
 
@@ -27,6 +31,21 @@ const getConnection = async () => {
         password: dbPassword
     });
 }
+
+
+/**
+ * Verifies the ID of a frontend user by making a call to Google's Oauth2 API.
+ * @param {string} googleIdToken String representing JWT of a frontend user's login info. 
+ * @returns the Payload resulting from a successful google login, or error.
+ */
+async function googleVerify(googleIdToken) {
+    const ticket = await client.verifyIdToken({
+        idToken: googleIdToken,
+    });
+    const payload = ticket.getPayload();
+    return payload;
+} 
+
 
 /**
  * Executes a defined query on a given connection, and sends response.
@@ -69,6 +88,34 @@ app.listen(port, async () => {
     connection.end();
 
     console.log(`Monitor project's Web Backend server is listening.`);
+});
+
+
+/**
+ * Passes a GoogleIDToken JWT from a frontend client on to Google to verify the id token. 
+ * Upon identification of a valid user login, returns the user's id details in json format. 
+ * POST '/auth/google'
+ * Content-type: application/JSON
+ * Body:
+ * {
+ *   "idToken": <id_token>    // GoogleIDToken JWT
+ * }
+ * https://developers.google.com/identity/gsi/web/guides/verify-google-id-token#node.js
+ */
+// Google OAuth token exchange route
+app.post('/auth/google', async (req, res) => {
+    const { idToken } = req.body; // Access idToken from the request body
+    console.log("The received Google ID Token is: ", idToken);
+    if (!idToken)
+        return res.status(400).json({ error: 'Google ID token is required' });
+    try {
+        // Call my verify function with parsed idToken
+        const payload = await googleVerify(idToken);
+        res.status(200).json({ payload });
+    } catch (error) {
+        console.error('Token verification error:', error);
+        res.status(500).json({ error: 'Failed to verify token' });
+    }
 });
 
 
