@@ -252,36 +252,6 @@ app.post('/new/node/', async (req, res) => {
         res.status(500).send(err.stack);
         throw err;
     }
-
-    // // Build query
-    // const create_data_table = "CREATE TABLE IF NOT EXISTS "
-    //     + `node_${id} (`
-    //     + "id SERIAL PRIMARY KEY,"
-    //     + "sensor_id INT,"
-    //     + "timestamp TIMESTAMP,"
-    //     + "temp DECIMAL(4,1),"
-    //     + "rh DECIMAL(4,1)"
-    //     + ");";
-        
-    // const create_sensors_table = "CREATE TABLE IF NOT EXISTS "
-    //     + `node_${id}_sensors (`
-    //     + "sensor_id SERIAL PRIMARY KEY,"
-    //     + "name VARCHAR(50)"
-    //     + ");";
-
-    // try {
-    //     const [results, fields] = await connection.query(create_data_table);
-    //     const [sensors_results, sensors_fields] = await connection.query(create_sensors_table);
-    //     console.log(results); // results contains rows returned by server
-    //     console.log(fields);  // fields contains extra meta data about results, if available
-    //     res.status(200).send(results, sensors_results);
-    //     connection.end();
-    // }
-    // catch (err) {
-    //     res.status(500).send(err.stack);
-    //     connection.end();
-    //     throw err;
-    // }
 });
 
 
