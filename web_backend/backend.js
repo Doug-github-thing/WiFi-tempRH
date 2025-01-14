@@ -136,8 +136,8 @@ app.get('/tables', async (req, res) => {
 app.get('/node/:node', async (req, res) => {
     const connection = await getConnection();
     const node = parseInt(req.params.node);
-    const my_query = `SELECT * FROM node_${node}_sensors`;
-    executeQuery(connection, my_query, req, res);
+    const my_query = "SELECT * FROM node_?_sensors";
+    executeQueryPlaceholders(connection, my_query, [node], req, res);
     connection.end();
 });
 
@@ -149,8 +149,8 @@ app.get('/node/:node/:sensor', async (req, res) => {
     const connection = await getConnection();
     const node = parseInt(req.params.node);
     const sensor = parseInt(req.params.sensor);
-    const my_query = `SELECT * FROM node_${node} WHERE sensor_id=${sensor}`;
-    executeQuery(connection, my_query, req, res);
+    const my_query = `SELECT * FROM node_? WHERE sensor_id=?`;
+    executeQueryPlaceholders(connection, my_query, [node, sensor], req, res);
     connection.end();
 });
 
@@ -162,10 +162,10 @@ app.get('/current/:node', async (req, res) => {
     const connection = await getConnection();
     const node = parseInt(req.params.node);
     const my_query = 
-        `SELECT * FROM node_${node}_sensors ns JOIN node_${node} n ON ns.sensor_id = n.sensor_id 
-        WHERE n.timestamp = (SELECT MAX(n1.timestamp) FROM node_${node} n1 WHERE n1.sensor_id = ns.sensor_id)
+        `SELECT * FROM node_?_sensors ns JOIN node_? n ON ns.sensor_id = n.sensor_id 
+        WHERE n.timestamp = (SELECT MAX(n1.timestamp) FROM node_? n1 WHERE n1.sensor_id = ns.sensor_id)
         ORDER BY ns.sensor_id ASC;`;   
-    executeQuery(connection, my_query, req, res);
+    executeQueryPlaceholders(connection, my_query, [node, node, node], req, res);
     connection.end();
 });
 
@@ -195,9 +195,9 @@ app.post('/data/:node', async (req, res) => {
     const node = parseInt(req.params.node);
 
     // Craft query and push to the database
-    const my_query = `INSERT INTO node_${node} VALUES (0, ?, ?, ?, ?);`;
+    const my_query = `INSERT INTO node_? VALUES (0, ?, ?, ?, ?);`;
     executeQueryPlaceholders(
-        connection, my_query, [data.sensor_id, timestamp, data.temp, data.rh], req, res);
+        connection, my_query, [node, data.sensor_id, timestamp, data.temp, data.rh], req, res);
     connection.end();
 });
 
@@ -229,21 +229,21 @@ app.post('/new/node/', async (req, res) => {
         
         // 2. Create node_#_sensors
         const new_node_sensors_query = 
-        `CREATE TABLE IF NOT EXISTS monitorDB.node_${new_node_id}_sensors (`
+        `CREATE TABLE IF NOT EXISTS monitorDB.node_?_sensors (`
         + "sensor_id INT PRIMARY KEY, name VARCHAR(50));";
-        const [sensors_results, sensors_fields] = await connection.query(new_node_sensors_query);
+        const [sensors_results, sensors_fields] = await connection.query(new_node_sensors_query, new_node_id);
         
         
         // 3. Create node_#
         const new_node_query = 
-        `CREATE TABLE IF NOT EXISTS monitorDB.node_${new_node_id} ( `
+        `CREATE TABLE IF NOT EXISTS monitorDB.node_? ( `
             + "id INT AUTO_INCREMENT PRIMARY KEY,"
             + "sensor_id INT,"
             + "timestamp TIMESTAMP,"
             + "temp DECIMAL(4,1),"
             + "rh DECIMAL(4,1)"
         + ");"
-        const [node_results, node_fields] = await connection.query(new_node_query);
+        const [node_results, node_fields] = await connection.query(new_node_query, new_node_id);
                 
         console.log(`Added new node with number ${new_node_id}`);
         res.status(200).send(results);
