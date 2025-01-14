@@ -204,45 +204,84 @@ app.post('/data/:node', async (req, res) => {
 
 /** 
  * Creates a new node representation in the database.
- *  TODO: Make it look through the number of nodes that exists and picks the next number.
- *  For now it just recreates Node0
+ * Expects a POST in the form: 
  * POST '/new/node'
+ * Content-type: application/JSON
+ * Body:
+ * {
+ *  "owner": <owner_id_int>,    // Int unique identifier for the user_id of this node's owner
+ *  "name": <node_name_string>, // String name for this node
+ * }
  */
-app.post('/new/node', async (req, res) => {
+app.post('/new/node/', async (req, res) => {
 
-    const id = 0; // A placeholder for the number of the node to add
+    const new_node_owner = req.body.owner;
+    const new_node_name = req.body.name;
 
     const connection = await getConnection();
 
-    // Build query
-    const create_data_table = "CREATE TABLE IF NOT EXISTS "
-        + `node_${id} (`
-        + "id SERIAL PRIMARY KEY,"
-        + "sensor_id INT,"
-        + "timestamp TIMESTAMP,"
-        + "temp DECIMAL(4,1),"
-        + "rh DECIMAL(4,1)"
-        + ");";
-        
-    const create_sensors_table = "CREATE TABLE IF NOT EXISTS "
-        + `node_${id}_sensors (`
-        + "sensor_id SERIAL PRIMARY KEY,"
-        + "name VARCHAR(50)"
-        + ");";
-
+    
     try {
-        const [results, fields] = await connection.query(create_data_table);
-        const [sensors_results, sensors_fields] = await connection.query(create_sensors_table);
-        console.log(results); // results contains rows returned by server
-        console.log(fields);  // fields contains extra meta data about results, if available
-        res.status(200).send(results, sensors_results);
-        connection.end();
+        // 1. insert new node into nodes table, get the # of this new node
+        const insert_node_query = "INSERT INTO monitorDB.nodes VALUES (NULL, ?, ?);";
+        const [results, fields] = await connection.query(insert_node_query, [new_node_owner, new_node_name]);
+        const new_node_id = results.insertId;
+        
+        // 2. Create node_#_sensors
+        const new_node_sensors_query = 
+        `CREATE TABLE IF NOT EXISTS monitorDB.node_${new_node_id}_sensors (`
+        + "sensor_id INT PRIMARY KEY, name VARCHAR(50));";
+        const [sensors_results, sensors_fields] = await connection.query(new_node_sensors_query);
+        
+        
+        // 3. Create node_#
+        const new_node_query = 
+        `CREATE TABLE IF NOT EXISTS monitorDB.node_${new_node_id} ( `
+            + "id INT AUTO_INCREMENT PRIMARY KEY,"
+            + "sensor_id INT,"
+            + "timestamp TIMESTAMP,"
+            + "temp DECIMAL(4,1),"
+            + "rh DECIMAL(4,1)"
+        + ");"
+        const [node_results, node_fields] = await connection.query(new_node_query);
+                
+        console.log(`Added new node with number ${new_node_id}`);
+        res.status(200).send(results);
     }
     catch (err) {
         res.status(500).send(err.stack);
-        connection.end();
         throw err;
     }
+
+    // // Build query
+    // const create_data_table = "CREATE TABLE IF NOT EXISTS "
+    //     + `node_${id} (`
+    //     + "id SERIAL PRIMARY KEY,"
+    //     + "sensor_id INT,"
+    //     + "timestamp TIMESTAMP,"
+    //     + "temp DECIMAL(4,1),"
+    //     + "rh DECIMAL(4,1)"
+    //     + ");";
+        
+    // const create_sensors_table = "CREATE TABLE IF NOT EXISTS "
+    //     + `node_${id}_sensors (`
+    //     + "sensor_id SERIAL PRIMARY KEY,"
+    //     + "name VARCHAR(50)"
+    //     + ");";
+
+    // try {
+    //     const [results, fields] = await connection.query(create_data_table);
+    //     const [sensors_results, sensors_fields] = await connection.query(create_sensors_table);
+    //     console.log(results); // results contains rows returned by server
+    //     console.log(fields);  // fields contains extra meta data about results, if available
+    //     res.status(200).send(results, sensors_results);
+    //     connection.end();
+    // }
+    // catch (err) {
+    //     res.status(500).send(err.stack);
+    //     connection.end();
+    //     throw err;
+    // }
 });
 
 
