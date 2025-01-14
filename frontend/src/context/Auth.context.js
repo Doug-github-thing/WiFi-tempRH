@@ -8,10 +8,11 @@ import API from "../api/API.js";
  *   isLoggedIn
  *   isLoginPending
  *   loginError
+ *   sessionToken
  * Tracks currently logged in user data:
  *   username
  *   useremail
- *   userid 
+ *   usernode
  *   sensorList 
  */
 export const AuthContext = React.createContext(null);
@@ -21,9 +22,10 @@ const initialState = {
     isLoggedIn: false,
     isLoginPending: false,
     loginError: null,
+    sessionToken: null,
     username: null,
     useremail: null,
-    userid: null,
+    userNode: null,
     sensorList: null
 }
 
@@ -35,7 +37,8 @@ export const ContextProvider = props => {
     const setLoginError = (loginError) => setState({loginError});
     const setUserName = (username) => setState({username});
     const setUserEmail = (useremail) => setState({useremail});
-    const setUserID = (userid) => setState({userid});
+    const setUserNode = (userNode) => setState({userNode});
+    const setSessionToken = (sessionToken) => setState({sessionToken});
     const setSensorList = (sensorList) => setState({sensorList});
 
     /**
@@ -46,18 +49,30 @@ export const ContextProvider = props => {
         setLoginPending(true);
         setLoginSuccess(false);
         setLoginError(null);
+        setUserEmail(null);
+        setUserName(null);
+        setSessionToken(null);
         setSensorList(null);
 
         try {
-            const raw_payload = await API.sendGoogleIDToBackend(googleIdToken);
-            const payload = raw_payload.payload;
+            const body_data = await API.sendGoogleIDToBackend(googleIdToken);
+            // Default the node of people without designated nodes to node 1
+            let my_node = 1;
+            try {
+                // Take just the first node from the comma delimited list
+                my_node = parseInt(body_data.valid_nodes.split(",")[0]);
+            } catch (error) {
+            }
+            
             setLoginPending(false);
-            setUserName(payload.given_name);
-            setUserEmail(payload.email);
-            setUserID(payload.sub);
+            setUserName(body_data.name);
+            setUserEmail(body_data.email);
+            setSessionToken(body_data.session_token);
+            setUserNode(my_node);
             setLoginSuccess(true);
-            API.getSensors(0).then(json => setSensorList(json));
+            API.getSensors(my_node).then(json => setSensorList(json));
         } catch (error) {
+            console.log("Error authenticating:",error);
             setLoginError(error);
         }
     }
@@ -68,7 +83,7 @@ export const ContextProvider = props => {
         setLoginError(null);
         setUserName(null);
         setUserEmail(null);
-        setUserID(null);
+        setSessionToken(null);
         setSensorList(null);
     }
 

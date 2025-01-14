@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50),       -- User's name
-    email VARCHAR(50),      -- User's email, the part before the @
+    email VARCHAR(50),      -- User's email
     valid_nodes VARCHAR(32) -- Comma separated list of nodes owned by this user
 );
-INSERT INTO monitorDB.users VALUES (NULL, 'Doug', 'dougrynar', '1,2');
+INSERT INTO monitorDB.users VALUES (NULL, 'Doug', 'dougrynar@gmail.com', '1,2');
 
 
 CREATE TABLE IF NOT EXISTS monitorDB.nodes (
@@ -34,13 +34,13 @@ INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (3, 'Bed Room');
 INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (4, 'Porch');
 
 
--- For tracking currently active session IDs. 
+-- For tracking currently active session tokens. 
 -- Default expiry is set to 1 hour after entry is made
-CREATE TABLE IF NOT EXISTS monitorDB.session_ids (
-    session_id VARCHAR(32) PRIMARY KEY,  -- This session ID
-    user_id INT,                         -- ID of the user this session belongs to
-    valid_nodes TEXT,                    -- Comma separated list of nodes owned by this user
-    expiry TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 1 HOUR) -- Time of expiration for this session id 
+CREATE TABLE IF NOT EXISTS monitorDB.session_tokens (
+    session_token VARBINARY(32) PRIMARY KEY,-- This session token
+    user_id INT,                            -- ID of the user this session belongs to
+    valid_nodes TEXT,                       -- Comma separated list of nodes owned by this user
+    expiry TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 1 HOUR) -- Time of expiration for this session token
 );
 
 

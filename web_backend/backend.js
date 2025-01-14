@@ -10,6 +10,8 @@ const fs = require('fs');
 // For google oauth2 GoogleIDToken verification 
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client();
+// For generating random session tokens
+const crypto = require('node:crypto');
 
 const port = 4001;
 
@@ -105,15 +107,36 @@ app.listen(port, async () => {
 // Google OAuth token exchange route
 app.post('/auth/google', async (req, res) => {
     const { idToken } = req.body; // Access idToken from the request body
-    console.log("The received Google ID Token is: ", idToken);
     if (!idToken)
         return res.status(400).json({ error: 'Google ID token is required' });
     try {
         // Call my verify function with parsed idToken
         const payload = await googleVerify(idToken);
-        res.status(200).json({ payload });
+        const user_email = payload.email;
+
+        const connection = await getConnection();
+        
+        // Find user data.
+        const get_user_id_query = "SELECT user_id, valid_nodes FROM monitorDB.users WHERE email = ?";
+        const [results, id_fields] = await connection.query(get_user_id_query, user_email);
+        const user_id = results[0].user_id;
+        const valid_nodes = results[0].valid_nodes;
+        console.log("My username and nodes query results are: ", results);
+        
+        // Generate session token, and add to the database. Expires by default after 1 hour after creation.
+        const session_token = crypto.randomBytes(32);
+        const new_session_token_query = "INSERT INTO monitorDB.session_tokens (session_token, user_id, valid_nodes) VALUES (?, ?, ?)"
+        console.log(user_id, valid_nodes);
+        const [session_result, session_fields] = await connection.query(new_session_token_query, [session_token, user_id, valid_nodes]);
+        
+        const token_as_hex_string = Array.from(session_token).map(byte => byte.toString(16).padStart(2, '0')).join('');
+        returnPayload =  { email: user_email, name: payload.name, session_token: token_as_hex_string, valid_nodes: valid_nodes };
+        
+        connection.end();
+        res.status(200).json(returnPayload);
+        console.log("Successful login attempt.");
     } catch (error) {
-        console.error('Token verification error:', error);
+        console.error('Error when fetching session token:', error);
         res.status(500).json({ error: 'Failed to verify token' });
     }
 });

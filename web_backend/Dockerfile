@@ -9,6 +9,7 @@ RUN npm install body-parser
 RUN npm install mysql2
 RUN npm install cors
 RUN npm install fs
+RUN npm install crypto
 RUN npm install google-auth-library --save
 
 # Copy the server file into the working directory

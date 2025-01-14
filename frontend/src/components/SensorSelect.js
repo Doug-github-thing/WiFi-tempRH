@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import API from "../api/API.js";
+import { AuthContext } from '../context/Auth.context.js';
 import "./SensorSelect.css";
 
 const SensorSelect = ({ select, setDashboardActive }) => {
     const [dropdownClicked, setDropdownClicked] = useState(false);
     const [sensorList, setSensorList] = useState(null);
+    const { state } = useContext(AuthContext);
 
     
     // Fetch sensor names from database on mount
     useEffect(() => {
-        API.getSensors(0).then(json => setSensorList(json));
+        API.getSensors(state.userNode).then(json => setSensorList(json));
     }, []);
 
 

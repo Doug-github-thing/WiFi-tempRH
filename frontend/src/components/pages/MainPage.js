@@ -15,19 +15,19 @@ const MainPage = ({ isDashboard, selectedSensor }) => {
     // Fetch the new data when new sensor is selected
     useEffect(() => {
         if (selectedSensor?.sensor_id != null)
-            API.getData(0,selectedSensor.sensor_id).then(json => setData(json));
+            API.getData(state.userNode,selectedSensor.sensor_id).then(json => setData(json));
     }, [selectedSensor]);
     
     
     // Whenever the dashboard is reloaded, hit the backend again the get current values
     useEffect(() => {
-        setCurrentList(API.getCurrent(0).then(json =>setCurrentList(json)));
+        setCurrentList(API.getCurrent(state.userNode).then(json =>setCurrentList(json)));
     }, [isDashboard]);
     
     
     // Also do it on load
     useEffect(() => {
-        setCurrentList(API.getCurrent(0).then(json => setCurrentList(json)));
+        setCurrentList(API.getCurrent(state.userNode).then(json => setCurrentList(json)));
     }, [state.sensorList]);
     
     
