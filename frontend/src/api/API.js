@@ -9,7 +9,6 @@ class API {
      * @returns Promise of a list of json objects
      */
     static async getSensors(node) {
-        console.log("Trying to get from url: " + this.backend_url);
         return await fetch(`${this.backend_url}/node/${node}`)
             .then(response => response.json())
             .catch(error => console.error(error));
@@ -36,6 +35,21 @@ class API {
         return await fetch(`${this.backend_url}/current/${node}`)
             .then(response => response.json())
             .catch(error => console.error(error));
+    }
+
+    /**
+     * Perform a POST request to the backend to verify the authenticity of the Google OAauth ID
+     * @idToken Google ID token as a string
+     * @returns Promise of a payload containing data regarding the authenticated user's id 
+     */
+    static async sendGoogleIDToBackend(idToken) {
+        return await fetch(`${this.backend_url}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }) // Send in form {"idToken": <actual_token_value>}
+        })
+        .then(response => response.json())
+        .catch(error => console.error(error));
     }
 }
 

@@ -48,8 +48,8 @@ services:
     build:
       context: ./frontend
       args:
-        # REACT_APP_BACKEND_URL: "http://localhost:4001"
-        REACT_APP_BACKEND_URL: "https://monitor.dougrynar.com/backend"
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL}
+        REACT_APP_OAUTH_CLIENT_ID: ${REACT_APP_OAUTH_CLIENT_ID}
     restart: always
     ports:
       - "4000:80"
