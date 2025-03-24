@@ -28,10 +28,10 @@ CREATE TABLE IF NOT EXISTS monitorDB.node_1_sensors (
     sensor_id INT PRIMARY KEY,
     name VARCHAR(50)
 );
-INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (1, 'Game Room');
-INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (2, 'Living Room');
+INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (1, 'Living Room');
+INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (2, 'Basement');
 INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (3, 'Bed Room');
-INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (4, 'Porch');
+INSERT INTO monitorDB.node_1_sensors (sensor_id, name) VALUES (4, 'Deck');
 
 
 -- For tracking currently active session tokens. 
