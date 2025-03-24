@@ -72,7 +72,7 @@ export const ContextProvider = props => {
             setLoginSuccess(true);
             API.getSensors(my_node).then(json => setSensorList(json));
         } catch (error) {
-            console.log("Error authenticating:",error);
+            console.log("Error in Auth.context.js::loginWithGoogleIdToken():",error);
             setLoginError(error);
         }
     }
