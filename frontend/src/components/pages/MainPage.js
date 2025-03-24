@@ -6,7 +6,7 @@ import "./MainPage.css";
 
 import { HistoricalDataPlot } from '../HistoricalDataPlot.js';
 
-const MainPage = ({ isDashboard, selectedSensor }) => {
+const MainPage = ({ selectedSensor, setSelectedSensor, isDashboard, setDashboardActive }) => {
     const { state, logout } = useContext(AuthContext);
     const [data, setData] = useState(null);
     const [currentList, setCurrentList] = useState([]);
@@ -30,11 +30,18 @@ const MainPage = ({ isDashboard, selectedSensor }) => {
         setCurrentList(API.getCurrent(state.userNode).then(json => setCurrentList(json)));
     }, [state.sensorList]);
     
+
+    const sensorClicked = ( sensor ) => {
+        console.log(`Sensor clicked: `, sensor);
+        setSelectedSensor(sensor);
+        setDashboardActive(false);
+    }
+
     
     const getDashboard = () => {
         return <>
             <div>{state.sensorList?.map((sensor) => (
-                <li className="sensorCard" key={sensor.sensor_id}>
+                <li className="sensorCard" key={sensor.sensor_id} onClick={()=>sensorClicked(sensor)}>
                     <div>{sensor.name}</div>
                     {
                         currentList[sensor.sensor_id-1] !== null 

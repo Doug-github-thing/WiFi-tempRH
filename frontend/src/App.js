@@ -15,7 +15,11 @@ const App = () => {
             if (!state.isLoggedIn)
                   return <Login />;
             else
-                  return <MainPage selectedSensor={selectedSensor} isDashboard={dashboardActive}/>;
+                  return <MainPage  selectedSensor={selectedSensor}
+                                    setSelectedSensor={setSelectedSensor}
+                                    isDashboard={dashboardActive}
+                                    setDashboardActive={setDashboardActive}
+                                    />;
       };
 
 
