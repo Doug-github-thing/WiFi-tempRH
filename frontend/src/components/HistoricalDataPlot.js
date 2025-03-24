@@ -50,14 +50,12 @@ export const HistoricalDataPlot = ({ data }) => {
     // Converts a SQL (ISO 8601) timestamp to a human readable M/D/Y HH:MM
     // Called when treating data prior to displaying.
     const convertTimestamp = (timestamp) => {
-        // const date = new Date(unix_timestamp * 1000);
-        console.log(`fuck yourself. Given timestamp is ${timestamp}`);
         const date = new Date(timestamp)
+        date.toLocaleDateString('en-US');
         console.log(`Converted to a date, I get: ${date}`);
         const mystr = date.toLocaleString(
             [], {month: 'numeric', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'})
         console.log(`Converted to a str, I get: ${mystr}`);
-        // date.toLocaleDateString('en-US');
         // const day = date.getDay();
         // const month = date.getMonth();
         // const year = date.getFullYear();
@@ -80,16 +78,19 @@ export const HistoricalDataPlot = ({ data }) => {
 
             {!inListView ?
                 // If we're not in list view
-                <ResponsiveContainer className={"GraphView"} width="100%" aspect={ 2 }>
+                <ResponsiveContainer className={"GraphView"} width="100%" aspect={ 1.5 }>
                     <LineChart data={ data }
-                        margin={{ top: 10, right: 10, left: 10, bottom: 50 }}>      
+                        margin={{ top: 10, right: 100, left: 100, bottom: 200 }}>      
                         <Line yAxisId="left" dataKey="temp" stroke="#61dafb" dot={ false } />
                         <YAxis yAxisId="left" stroke="#61dafb" domain={ getYAxisRange("temp") } /> 
                         <Line yAxisId="right" stroke="#BADBED" type="monotone" dataKey="rh" dot={ false } />
                         <YAxis yAxisId="right" stroke="#BADBED" domain={ getYAxisRange("rh") } orientation={ "right" } /> 
-                        <XAxis dataKey="timestamp" stroke="#BADBED" angle={ -30 } textAnchor="end" />
                         <Tooltip content={ <CustomTooltip /> } cursor={{ fill: "transparent" }} />
                         <Legend layout="horizontal" verticalAlign="top" align="center" />
+                        <XAxis dataKey="timestamp" stroke="#BADBED"
+                            angle={ -45 } 
+                            textAnchor="end" 
+                            tickFormatter={convertTimestamp}/>
                     </LineChart>
                 </ResponsiveContainer>
                 :
