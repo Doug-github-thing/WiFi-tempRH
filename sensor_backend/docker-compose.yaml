@@ -1,0 +1,9 @@
+services:
+    sensor_backend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: monitor-sensor_backend
+        restart: always
+        ports:
+          - "55555:55555"
